@@ -1,0 +1,133 @@
+% !TEX root = main.tex
+% chktex-file 46
+
+% **************************************************
+% Files' Character Encoding
+% **************************************************
+\PassOptionsToPackage{utf8}{inputenc}
+\usepackage{inputenc}
+\usepackage[ngerman,english]{babel}
+
+% **************************************************
+% Information and Commands for Reuse
+% **************************************************
+\newcommand{\thesisTitle}{Speeding Up Classification Algorithms in Big Data Environments: A review}
+\newcommand{\thesisName}{Clemens Damke}
+\newcommand{\thesisMatNr}{7011488}
+\newcommand{\thesisSubject}{Seminar paper}
+\newcommand{\thesisDate}{\today}
+\newcommand{\thesisVersion}{Draft}
+
+\newcommand{\thesisSupervisor}{Marcel Wever}
+
+\newcommand{\thesisUniversity}{}
+\newcommand{\thesisUniversityDepartment}{Department of Computer Science}
+\newcommand{\thesisUniversityInstitute}{Institute for Computer Science}
+\newcommand{\thesisUniversityGroup}{Intelligent Systems Group (ISG)}
+\newcommand{\thesisUniversityCity}{Paderborn}
+\newcommand{\thesisUniversityStreetAddress}{Pohlweg 51}
+\newcommand{\thesisUniversityPostalCode}{33098}
+
+
+
+% **************************************************
+% Debug LaTeX Information
+% **************************************************
+%\listfiles
+
+
+% **************************************************
+% Load and Configure Packages
+% **************************************************
+
+% Colors:
+\usepackage[usenames, dvipsnames, svgnames, table]{xcolor}
+
+\definecolor{blau}{HTML}{355FB3}
+\definecolor{rot}{HTML}{B33535}
+\definecolor{gruen}{HTML}{3BB335}
+\definecolor{dunkelblau}{HTML}{1E3666}
+\definecolor{hellblau}{HTML}{8ea7d7}
+
+\usepackage{minted}
+\usepackage{etoolbox,xpatch}
+\makeatletter
+\AtBeginEnvironment{minted}{\dontdofcolorbox}
+\def\dontdofcolorbox{\renewcommand\fcolorbox[4][]{##4}}
+\xpatchcmd{\inputminted}{\minted@fvset}{\minted@fvset\dontdofcolorbox}{}{}
+\makeatother
+\setminted{
+	fontsize=\footnotesize,
+	numbers=left,
+	tabsize=4,
+	breaklines=true
+}
+
+\PassOptionsToPackage{% setup clean thesis style
+    figuresep=space,
+    sansserif=false,
+    hangfigurecaption=false,
+    hangsection=true,
+    hangsubsection=true,
+    colorize=full,
+    colortheme=custom,
+	colormain=dunkelblau,
+	coloraccessory=blau,
+    bibsys=bibtex,
+    bibfile=bib-refs,
+    bibstyle=alphabetic,
+    wrapfooter=false,
+}{cleanthesis}
+\usepackage{cleanthesis}
+
+\usepackage{mathtools}
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
+
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows,positioning}
+\usetikzlibrary{calc}
+\newcommand{\tikzmark}[1]{\tikz[overlay,remember picture] \node (#1) {};} % chktex 1
+
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.14}
+\usepgfplotslibrary{dateplot, statistics}
+\pgfplotsset{
+    cycle list={blau\\rot\\gruen\\},
+}
+
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily,breaklines=true}
+
+\usepackage{tasks}
+\settasks{counter-format=tsk[1].}
+
+\usepackage[bguq]{frege}
+\usepackage{stmaryrd}
+\usepackage{multicol}
+\usepackage{pbox}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{csvsimple}
+\usepackage{siunitx}
+
+\hypersetup{% setup the hyperref-package options
+    pdftitle={\thesisTitle},    %   - title (PDF meta)
+    pdfsubject={\thesisSubject},%   - subject (PDF meta)
+    pdfauthor={\thesisName},    %   - author (PDF meta)
+    plainpages=false,           %   -
+    colorlinks=false,           %   - colorize links?
+    pdfborder={0 0 0},          %   -
+    breaklinks=true,            %   - allow line break inside links
+    bookmarksnumbered=true,     %
+    bookmarksopen=true          %
+}
+
+\makeatletter
+\newcounter{rulecount}[section]
+\newcommand{\ruleno}[1]{\ensuremath{r_{#1}}}
+\newcommand{\rulecurrent}{\ruleno{\therulecount}}
+\newcommand{\rulemark}[1]{\refstepcounter{rulecount}(\rulecurrent)\ltx@label{#1}} % chktex 36
+\newcommand{\ruleref}[1]{\ruleno{\ref{#1}}}
+\makeatother
