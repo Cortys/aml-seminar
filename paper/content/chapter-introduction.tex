@@ -7,22 +7,23 @@
 
 Over the last few years Big Data processing has become increasingly important in many domains.
 This increase in the data volume also poses new challenges for machine learning applications.
-The training time of learners is usually polynomially dependent on the size of the training dataset \(\mathcal{D}_{\mathit{train}}\), i.~e. \(\Omega(|\mathcal{D}_{\mathit{train}}|^k), k \geq 1\).
+The training time of learners is usually polynomially dependent on the size of the training dataset \(\mathcal{D}_{\mathit{train}}\), i.~e. \(\mathcal{O}(|\mathcal{D}_{\mathit{train}}|^\alpha), \alpha \geq 1\).
 Since training has to be repeated for every iteration of validation and hyperparameter search, always using the entire dataset quickly becomes infeasible.
 This paper gives an overview of approaches to tackle this problem.
 
 The process of finding an optimal model can in general be split into two phases:
 \begin{enumerate}
 	\item \textbf{Hyperparameter search:}
-		Finding a vector \(\lambda\) in the hyperparameter space \(\Lambda_L\) of the learner \(L\) representing a hypothesis space \(\mathcal{H}_\lambda\).
-		A na\"ive approach for this is a simple grid or a random search over \(\Lambda_L\).
-		To evaluate the quality of a given \(\lambda\) a parameter search is usually performed which yields a hypothesis \(\hat{h} \in \mathcal{H}_\lambda\) that is evaluated using a validation dataset \(\mathcal{D}_{valid}\).
-	\item \textbf{Parameter search:}
-		Finding a vector \(w\) in the parameter space \(W_{\mathcal{H}_\lambda}\), describing a hypothesis \(h_w \in \mathcal{H}_\lambda\) given a hyperparameter configuration \(\lambda\).
-		The goal is to find a hypothesis \(h_w\) that minimizes the empirical error on a given test dataset \(\mathcal{D}_{\mathit{test}}\).
-		Depending on the learner \(L\), various kinds of optimization methods can be used to find such an hypothesis, e.~g.\ gradient descent or quadratic programming.
+		Optimizing a vector \(\lambda\) in the hyperparameter space \(\Lambda_L\) of a learner \(L\) representing a hypothesis space \(\mathcal{H}_{\lambda}\).
+		A na\"ive approach to do this is to systematically try configurations using a grid search or a random search over \(\Lambda_L\).
+		To evaluate the quality of a given \(\lambda\), \(L\) is usually trained on a training dataset \(\mathcal{D}_{\mathit{train}}\) using \(\lambda\). This yields a hypothesis \(\hat{h}_\lambda \in \mathcal{H}_{\lambda}\) that is evaluated using a validation dataset \(\mathcal{D}_{\mathit{valid}}\).
+	\item \textbf{Training or parameter search:}
+		Let \(w\) be a vector in the parameter space \(W_{\mathcal{H}_\lambda}\), describing a hypothesis \(h_{\lambda, w} \in \mathcal{H}_\lambda\) given a hyperparameter configuration \(\lambda\).
+		The goal of parameter search is to find or approximate a hypothesis \(\hat{h}_\lambda := \arg\min_{h_{\lambda, w}}{e(\mathcal{D}_{\mathit{train}} | h_{\lambda, w})}\), with \(e(\mathcal{D}_{\mathit{train}} | h_{\lambda, w})\) being the empirical error of \(h_{\lambda, w}\) on a given training dataset \(\mathcal{D}_{\mathit{train}}\) according to some error measure.
+		Depending on the learner \(L\), various kinds of optimization methods are used to find this minimum, e.~g.\@ bayesian optimization, quadratic programming or, if \(\nabla_w e(\mathcal{D}_{\mathit{train}} | h_{\lambda, w})\) is computable, gradient descent.
+		The quality \(f\) of \(\hat{h}_\lambda\) is usually measured by the error on a validation or test dataset, i.~e.\@ \(f(\lambda) := e(\mathcal{D}_{\mathit{valid}} | \hat{h}_\lambda)\).
 \end{enumerate}
-This paper is structured according to those phases.
+This paper is structured according to those two phases.
 \Treft{sec:hyperparams} describes ways to speed up the hyperparameter search.
-\Treft{sec:params} then describes how to improve existing optimization methods for parameter search.
-Most of the techniques described in this paper improve upon orthogonal components of the model finding process which allows combining them.
+\Treft{sec:params} then describes how to improve the training methods of existing learners.
+Most of the techniques described in this paper improve upon independent components of the model finding process allowing them to be combined.

@@ -3,4 +3,13 @@
 \chapter{Hyperparameter optimization}%
 \label{sec:hyperparams}
 
-\TODO\
+The runtime of hyperparameter optimization depends upon multiple independent variables:
+\begin{enumerate}
+	\item \textbf{Number of iterations \(T\):}
+		During optimization multiple hyperparameter configurations \(\lambda_1, \dots, \lambda_T\) will be evaluated against \(\mathcal{D}_{\mathit{valid}}\).
+		\(T\) is usually fixed when using a grid search or a random search.
+		After evaluating \(T\) configurations, the best one is chosen.
+		This method assumes that \(f(\lambda_i)\) is independent of \(f(\lambda_j)\) for all pairs \(\lambda_i \neq \lambda_j\).
+		We will see that this strong assumption of independence is not necessarily true which in turn allows estimating \(\mathbb{E}[f]\) to guide the search.
+	\item \textbf{Training dataset size \(S\):}
+\end{enumerate}
