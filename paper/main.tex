@@ -1,20 +1,7 @@
 % **************************************************
 % Document Class Definition
 % **************************************************
-\documentclass[%
-    paper=A4,               % paper size --> A4 is default in Germany
-    twoside=true,           % onesite or twoside printing
-    openright,              % doublepage cleaning ends up right side
-    parskip=full,           % spacing value / method for paragraphs
-    chapterprefix=true,     % prefix for chapter marks
-    11pt,                   % font size
-    headings=normal,        % size of headings
-    bibliography=totoc,     % include bib in toc
-    listof=totoc,           % include listof entries in toc
-    titlepage=on,           % own page for each title page
-    captions=tableabove,    % display table captions above the float env
-    draft=false,            % value for draft version
-]{scrreprt}%
+\documentclass[runningheads,a4paper]{llncs}
 
 \input{config}
 
@@ -24,23 +11,10 @@
 \begin{document}
 
 % --------------------------
-% rename document parts
-% --------------------------
-\renewcaptionname{ngerman}{\figurename}{Abb.}
-\renewcaptionname{ngerman}{\tablename}{Tab.}
-
-\newcommand{\fixedinput}{\input}
-
-% --------------------------
 % Front matter
 % --------------------------
-\pagenumbering{roman}			% roman page numbing (invisible for empty page style)
-\pagestyle{empty}				% no header or footers
-\input{content/titlepages}		% INCLUDE: all titlepages
-
-\input{content/abstract}		% INCLUDE: the abstracts (english and german)
-\pagestyle{plain}				% display just page numbers
-\clearpage\
+\input{content/titlepages}
+\input{content/abstract}
 
 % --------------------------
 % Body matter
@@ -56,7 +30,6 @@
 % Back matter
 % --------------------------
 {%
-\setstretch{1.1}
 \renewcommand{\bibfont}{\normalfont\small}
 \setlength{\biblabelsep}{0pt}
 \setlength{\bibitemsep}{0.5\baselineskip plus 0.5\baselineskip} % chktex 1

@@ -49,37 +49,6 @@
 \definecolor{dunkelblau}{HTML}{1E3666}
 \definecolor{hellblau}{HTML}{8ea7d7}
 
-\usepackage{minted}
-\usepackage{etoolbox,xpatch}
-\makeatletter
-\AtBeginEnvironment{minted}{\dontdofcolorbox}
-\def\dontdofcolorbox{\renewcommand\fcolorbox[4][]{##4}}
-\xpatchcmd{\inputminted}{\minted@fvset}{\minted@fvset\dontdofcolorbox}{}{}
-\makeatother
-\setminted{
-	fontsize=\footnotesize,
-	numbers=left,
-	tabsize=4,
-	breaklines=true
-}
-
-\PassOptionsToPackage{% setup clean thesis style
-    figuresep=space,
-    sansserif=false,
-    hangfigurecaption=false,
-    hangsection=true,
-    hangsubsection=true,
-    colorize=full,
-    colortheme=custom,
-	colormain=dunkelblau,
-	coloraccessory=blau,
-    bibsys=bibtex,
-    bibfile=bib-refs,
-    bibstyle=alphabetic,
-    wrapfooter=false,
-}{cleanthesis}
-\usepackage{cleanthesis}
-
 \usepackage{mathtools}
 \newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
 
@@ -112,6 +81,7 @@
 \usepackage{csvsimple}
 \usepackage{siunitx}
 
+\usepackage{hyperref}
 \hypersetup{% setup the hyperref-package options
     pdftitle={\thesisTitle},    %   - title (PDF meta)
     pdfsubject={\thesisSubject},%   - subject (PDF meta)
@@ -123,6 +93,24 @@
     bookmarksnumbered=true,     %
     bookmarksopen=true          %
 }
+
+\RequirePackage[					% use biblatex for bibliography
+	backend=bibtex,					% 	- use biber backend (bibtex replacement) or bibtex
+	style=alphabetic,				% 	- use alphabetic (or numeric) bib style
+	natbib=true,					% 	- allow natbib commands
+	hyperref=true,					% 	- activate hyperref support
+	backref=true,					% 	- activate backrefs
+	isbn=false,						% 	- don't show isbn tags
+	url=false,						% 	- don't show url tags
+	doi=false,						% 	- don't show doi tags
+	urldate=long,					% 	- display type for dates
+	maxnames=3,%
+	minnames=1,%
+	maxbibnames=5,%
+	minbibnames=3,%
+	maxcitenames=2,%
+	mincitenames=1%
+]{biblatex}
 
 \makeatletter
 \newcounter{rulecount}[section]

@@ -1,56 +1,11 @@
 % !TEX root = ../main.tex
 %
 
-% ------------------------------------  --> main title page
-\begin{titlepage}
-	\pdfbookmark[0]{Titlepage}{Titlepage}
-	\sffamily\
+\title{\thesisTitle}
+\author{\thesisName}
+\institute{Intelligent Systems Group (ISG) \\
+Department of Electrical Engineering, Computer Science and Mathematics \\
+Warburger Straße 100 \\
+33098 Paderborn}
 
-	\begin{figure}
-	\begin{minipage}[t]{8.5cm}
-	\includegraphics[height=1.8cm]{gfx/upb_1E}\\
-	\textsf{\small{\hspace*{1.3cm}Department of Electrical Engineering,\\
-	\hspace*{1.3cm}Computer Science and Mathematics\\
-%		\hspace*{1.3cm}Institute of Computer Science\\
-		\hspace*{1.3cm}Warburger Straße 100 \\
-		\hspace*{1.3cm}33098 Paderborn
-		}}
-	\end{minipage}
-	\hfill
-	\begin{minipage}[t]{5cm}
-	\includegraphics[height=1.8cm]{gfx/is-logo-klein}\\
-	\textsf{%Institute of Computer Science\\
-	\hspace*{0.1cm}\small{Intelligent Systems Group (ISG)}
-	}
-	\end{minipage}
-	\end{figure}
-
-	\centering
-
-	\vfill
-	{\large \thesisSubject} \\[5mm]
-	{\LARGE \color{ctcolortitle}\textbf{\thesisTitle} \\[10mm]}
-	{\Large \thesisName} \\
-
-	\vfill
-
-	\thesisDate\\ % chktex 21
-
-\end{titlepage}
-
-
-% ------------------------------------  --> lower title back for single page layout
-\hfill
-\vfill
-{
-	\small
-	\textbf{\thesisName} \\
-	\textit{\thesisTitle} \\
-	\thesisSubject, \thesisDate\\ % chktex 21
-	Supervisor: \thesisSupervisor\\[1.5em] % chktex 21
-	\textbf{\thesisUniversity} \\
-	\textit{\thesisUniversityGroup} \\
-	\thesisUniversityDepartment\\ % chktex 21
-	\thesisUniversityStreetAddress\\ % chktex 21
-	\thesisUniversityPostalCode\ \thesisUniversityCity\
-}
+\maketitle

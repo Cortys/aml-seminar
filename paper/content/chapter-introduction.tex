@@ -1,5 +1,5 @@
 % !TEX root = ../main.tex
-\chapter{Introduction}%
+\section{Introduction}%
 \label{sec:intro}
 
 \pagenumbering{arabic}			% arabic page numbering
@@ -24,6 +24,6 @@ The process of finding an optimal model can in general be split into two phases:
 		The quality \(f\) of \(\hat{h}_\lambda\) is usually measured by the error on a validation or test dataset, i.~e.\@ \(f(\lambda) := e(\mathcal{D}_{\mathit{valid}} | \hat{h}_\lambda)\).
 \end{enumerate}
 This paper is structured according to those two phases.
-\Treft{sec:hyperparams} describes ways to speed up the hyperparameter search.
-\Treft{sec:params} then describes how to improve the training methods of existing learners.
+Section \ref{sec:hyperparams} describes ways to speed up the hyperparameter search.
+Section \ref{sec:params} then describes how to improve the training methods of existing learners.
 Most of the techniques described in this paper improve upon independent components of the model finding process allowing them to be combined.
