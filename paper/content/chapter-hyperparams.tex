@@ -3,19 +3,49 @@
 \section{Hyperparameter optimization}%
 \label{sec:hyperparams}
 
-The runtime of hyperparameter optimization depends upon multiple independent variables:
+As described earlier, the goal of hyperparameter optimization is to find a global minimum of \(f\).
+Since \(f\) is generally unknown, analytical solutions or gradient descent cannot usually be applied.
+The only way the get information about \(f\) is to evaluate it, which is costly.
+There are multiple ways to reduce the total cost of those evaluations:
 \begin{enumerate}
-	\item \textbf{Number of iterations \(T\):}
-		During optimization multiple hyperparameter configurations \(\lambda_1, \dots, \lambda_T\) will be evaluated against \(\mathcal{D}_{\mathit{valid}}\).
+	\item \textbf{Number \(T\) of evaluations of \(f\):}
+		During optimization multiple hyperparameter configurations \(\lambda_1, \dots, \lambda_T\) will be evaluated using \(f\).
 		\(T\) is usually fixed when using a grid search or a random search.
 		After evaluating \(T\) configurations, the best one is chosen.
-		This method assumes that \(f(\lambda_i)\) is independent of \(f(\lambda_j)\) for all pairs \(\lambda_i \neq \lambda_j\).
-		We will see that this strong assumption of independence is not necessarily true which in turn allows estimating \(\mathbb{E}[f]\) to guide the search.
+		Those na{\"\i}ve approaches assume that \(f(\lambda_i)\) is independent of \(f(\lambda_j)\) for all pairs \(\lambda_i \neq \lambda_j\).
+		We will see that this strong assumption of independence is not necessarily true which in turn allows reducing \(T\).
 	\item \textbf{Training dataset size \(S\):}
+		The performance of a given configuration \(f(\lambda)\) is computed by training the learner on \(\Dtrain\) which is expensive for big datasets.
+		By training on \(S\) instead of \(|\Dtrain|\) datapoints the evaluation can be sped up.
+	\item \textbf{Number of parameter search iterations \(E\):}
+		Depending on the learner, training often is an iterative process, e.~g.\@ gradient descent.
+		To speed up hyperparameter optimization training could be terminated before convergence.
 \end{enumerate}
 
-\subsection{Bayesian Optimization}%
+\subsection{FABOLAS}%
 \label{sec:hyperparams:fabolas}
+
+The first approach we will discuss is called FABOLAS (Fast Bayesian Optimization of Machine Learning Hyperparameters on Large Datasets)~\cite{Klein2016}.
+It can be applied to any learner \(L\) and is based upon two main ideas:
+\begin{enumerate}
+	\item The function \(f\) is modeled as a \textit{Gaussian process} (GP) \(\hat{f}\) based on the assumption that two configurations \(\lambda_1\) and \(\lambda_2\) will perform similar if they are similar according to some kernel \(k(\lambda_1, \lambda_2)\).
+		The Gaussian process \(\hat{f}\) is used as a surrogate to estimate the expected value and variance of \(f\) given \(\lambda\).
+		Using \textit{Bayesian optimization} \(f\) will be probed at promising positions to iteratively improve \(\hat{f}\).
+		Hyperparameter configurations that are expected to perform worse than the current optimum will not be probed.
+		This effectively reduces \(T\).
+	\item The training dataset size \(S\) is modeled as an additional hyperparameter of \(\hat{f}\).
+		This allows extrapolating the value of \(f\) when trained on the complete dataset while only probing smaller subsets.
+\end{enumerate}
+We will now describe how those two ideas can be applied.
+
+\subsubsection{Gaussian processes}%
+\label{sec:hyperparams:fabolas:gaussian}
+
+
+
+\subsubsection{Bayesian optimization}%
+\label{sec:hyperparams:fabolas:bayesian}
+
 
 \subsection{Learning Curve Extrapolation}%
 \label{sec:hyperparams:earlyterm}

@@ -1,7 +1,7 @@
 % **************************************************
 % Document Class Definition
 % **************************************************
-\documentclass[runningheads,a4paper]{llncs}
+\documentclass[runningheads]{llncs}
 
 \input{config}
 
@@ -19,7 +19,10 @@
 % --------------------------
 % Body matter
 % --------------------------
-\pagestyle{maincontentstyle} 	% fancy header and footer
+
+\newcommand{\Dtrain}{\mathcal{D}_{\mathit{train}}}
+\newcommand{\Dvalid}{\mathcal{D}_{\mathit{valid}}}
+\newcommand{\Dtest}{\mathcal{D}_{\mathit{test}}}
 
 \input{content/chapter-introduction}
 \input{content/chapter-hyperparams}

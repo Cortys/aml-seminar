@@ -1,3 +1,80 @@
 % Encoding: UTF-8
 
+@Article{Klein2016,
+  author      = {Aaron Klein and Stefan Falkner and Simon Bartels and Philipp Hennig and Frank Hutter},
+  title       = {Fast Bayesian Optimization of Machine Learning Hyperparameters on Large Datasets},
+  date        = {2016-05-23},
+  eprint      = {1605.07079v2},
+  eprintclass = {cs.LG},
+  eprinttype  = {arXiv},
+  abstract    = {Bayesian optimization has become a successful tool for hyperparameter optimization of machine learning algorithms, such as support vector machines or deep neural networks. Despite its success, for large datasets, training and validating a single configuration often takes hours, days, or even weeks, which limits the achievable performance. To accelerate hyperparameter optimization, we propose a generative model for the validation error as a function of training set size, which is learned during the optimization process and allows exploration of preliminary configurations on small subsets, by extrapolating to the full dataset. We construct a Bayesian optimization procedure, dubbed Fabolas, which models loss and training time as a function of dataset size and automatically trades off high information gain about the global optimum against computational cost. Experiments optimizing support vector machines and deep neural networks show that Fabolas often finds high-quality solutions 10 to 100 times faster than other state-of-the-art Bayesian optimization methods or the recently proposed bandit strategy Hyperband.},
+  file        = {:http\://arxiv.org/pdf/1605.07079v2:PDF},
+  keywords    = {cs.LG, cs.AI, stat.ML},
+}
+
+@InProceedings{Domhan2015,
+  author    = {Domhan, Tobias and Springenberg, Jost Tobias and Hutter, Frank},
+  title     = {Speeding Up Automatic Hyperparameter Optimization of Deep Neural Networks by Extrapolation of Learning Curves},
+  booktitle = {Proceedings of the 24th International Conference on Artificial Intelligence},
+  year      = {2015},
+  series    = {IJCAI'15},
+  publisher = {AAAI Press},
+  location  = {Buenos Aires, Argentina},
+  isbn      = {978-1-57735-738-4},
+  pages     = {3460--3468},
+  url       = {http://dl.acm.org/citation.cfm?id=2832581.2832731},
+  acmid     = {2832731},
+  numpages  = {9},
+}
+
+@Article{Kleiner2011,
+  author      = {Ariel Kleiner and Ameet Talwalkar and Purnamrita Sarkar and Michael I. Jordan},
+  title       = {A Scalable Bootstrap for Massive Data},
+  date        = {2011-12-21},
+  eprint      = {1112.5016v2},
+  eprintclass = {stat.ME},
+  eprinttype  = {arXiv},
+  abstract    = {The bootstrap provides a simple and powerful means of assessing the quality of estimators. However, in settings involving large datasets---which are increasingly prevalent---the computation of bootstrap-based quantities can be prohibitively demanding computationally. While variants such as subsampling and the $m$ out of $n$ bootstrap can be used in principle to reduce the cost of bootstrap computations, we find that these methods are generally not robust to specification of hyperparameters (such as the number of subsampled data points), and they often require use of more prior information (such as rates of convergence of estimators) than the bootstrap. As an alternative, we introduce the Bag of Little Bootstraps (BLB), a new procedure which incorporates features of both the bootstrap and subsampling to yield a robust, computationally efficient means of assessing the quality of estimators. BLB is well suited to modern parallel and distributed computing architectures and furthermore retains the generic applicability and statistical efficiency of the bootstrap. We demonstrate BLB's favorable statistical performance via a theoretical analysis elucidating the procedure's properties, as well as a simulation study comparing BLB to the bootstrap, the $m$ out of $n$ bootstrap, and subsampling. In addition, we present results from a large-scale distributed implementation of BLB demonstrating its computational superiority on massive data, a method for adaptively selecting BLB's hyperparameters, an empirical study applying BLB to several real datasets, and an extension of BLB to time series data.},
+  file        = {:http\://arxiv.org/pdf/1112.5016v2:PDF},
+  keywords    = {stat.ME, stat.CO, stat.ML},
+}
+
+@Article{Byrd2012,
+  author    = {Richard H. Byrd and Gillian M. Chin and Jorge Nocedal and Yuchen Wu},
+  title     = {Sample size selection in optimization methods for machine learning},
+  journal   = {Mathematical Programming},
+  year      = {2012},
+  volume    = {134},
+  number    = {1},
+  month     = {jun},
+  pages     = {127--155},
+  doi       = {10.1007/s10107-012-0572-5},
+  publisher = {Springer Nature},
+}
+
+@Article{Wang2017,
+  author        = {HaiYing Wang and Rong Zhu and Ping Ma},
+  title         = {Optimal Subsampling for Large Sample Logistic Regression},
+  date          = {2017-02-03},
+  eprint        = {1702.01166v2},
+  eprintclass   = {stat.CO},
+  eprinttype    = {arXiv},
+  __markedentry = {[clemens:]},
+  abstract      = {For massive data, the family of subsampling algorithms is popular to downsize the data volume and reduce computational burden. Existing studies focus on approximating the ordinary least squares estimate in linear regression, where statistical leverage scores are often used to define subsampling probabilities. In this paper, we propose fast subsampling algorithms to efficiently approximate the maximum likelihood estimate in logistic regression. We first establish consistency and asymptotic normality of the estimator from a general subsampling algorithm, and then derive optimal subsampling probabilities that minimize the asymptotic mean squared error of the resultant estimator. An alternative minimization criterion is also proposed to further reduce the computational cost. The optimal subsampling probabilities depend on the full data estimate, so we develop a two-step algorithm to approximate the optimal subsampling procedure. This algorithm is computationally efficient and has a significant reduction in computing time compared to the full data approach. Consistency and asymptotic normality of the estimator from a two-step algorithm are also established. Synthetic and real data sets are used to evaluate the practical performance of the proposed method.},
+  file          = {:http\://arxiv.org/pdf/1702.01166v2:PDF},
+  keywords      = {stat.CO, stat.ME, stat.ML},
+}
+
+@Article{Al-Jarrah2015,
+  author      = {Al-Jarrah, O. Y. and Yoo, P. D. and Muhaidat, S. and Karagiannidis, G. K. and Taha, K.},
+  title       = {Efficient Machine Learning for Big Data: A Review},
+  date        = {2015-03-18},
+  eprint      = {1503.05296v1},
+  eprintclass = {cs.LG},
+  eprinttype  = {arXiv},
+  abstract    = {With the emerging technologies and all associated devices, it is predicted that massive amount of data will be created in the next few years, in fact, as much as 90% of current data were created in the last couple of years,a trend that will continue for the foreseeable future. Sustainable computing studies the process by which computer engineer/scientist designs computers and associated subsystems efficiently and effectively with minimal impact on the environment. However, current intelligent machine-learning systems are performance driven, the focus is on the predictive/classification accuracy, based on known properties learned from the training samples. For instance, most machine-learning-based nonparametric models are known to require high computational cost in order to find the global optima. With the learning task in a large dataset, the number of hidden nodes within the network will therefore increase significantly, which eventually leads to an exponential rise in computational complexity. This paper thus reviews the theoretical and experimental data-modeling literature, in large-scale data-intensive fields, relating to: (1) model efficiency, including computational requirements in learning, and data-intensive areas structure and design, and introduces (2) new algorithmic approaches with the least memory requirements and processing to minimize computational cost, while maintaining/improving its predictive/classification accuracy and stability.},
+  file        = {:http\://arxiv.org/pdf/1503.05296v1:PDF},
+  keywords    = {cs.LG, cs.AI},
+}
+
 @Comment{jabref-meta: databaseType:biblatex;}

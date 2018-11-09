@@ -11,7 +11,7 @@
 % **************************************************
 % Information and Commands for Reuse
 % **************************************************
-\newcommand{\thesisTitle}{Speeding Up Classification Algorithms in Big Data Environments: A review}
+\newcommand{\thesisTitle}{Speeding Up Classification Algorithms in Big Data Environments}
 \newcommand{\thesisName}{Clemens Damke}
 \newcommand{\thesisMatNr}{7011488}
 \newcommand{\thesisSubject}{Seminar paper}
@@ -39,6 +39,15 @@
 % **************************************************
 % Load and Configure Packages
 % **************************************************
+\usepackage{geometry}
+\geometry{
+  a4paper,         % or letterpaper
+  textwidth=13cm,  % llncs has 12.2cm
+  textheight=23cm, % llncs has 19.3cm
+  heightrounded,   % integer number of lines
+  hratio=1:1,      % horizontally centered
+  vratio=1:1,      % vertically centered
+}
 
 % Colors:
 \usepackage[usenames, dvipsnames, svgnames, table]{xcolor}
@@ -94,7 +103,7 @@
     bookmarksopen=true          %
 }
 
-\RequirePackage[					% use biblatex for bibliography
+\usepackage[						% use biblatex for bibliography
 	backend=bibtex,					% 	- use biber backend (bibtex replacement) or bibtex
 	style=alphabetic,				% 	- use alphabetic (or numeric) bib style
 	natbib=true,					% 	- allow natbib commands
@@ -111,6 +120,7 @@
 	maxcitenames=2,%
 	mincitenames=1%
 ]{biblatex}
+\bibliography{bib-refs}
 
 \makeatletter
 \newcounter{rulecount}[section]
