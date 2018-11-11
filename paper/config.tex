@@ -70,6 +70,8 @@
 \usetikzlibrary{arrows,positioning}
 \usetikzlibrary{calc}
 \newcommand{\tikzmark}[1]{\tikz[overlay,remember picture] \node (#1) {};} % chktex 1
+\usepackage[labelfont=bf]{caption}
+\usepackage{subcaption}
 
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
@@ -109,7 +111,7 @@
 
 \usepackage[						% use biblatex for bibliography
 	backend=bibtex,					% 	- use biber backend (bibtex replacement) or bibtex
-	style=alphabetic,				% 	- use alphabetic (or numeric) bib style
+	style=numeric,					% 	- use alphabetic (or numeric) bib style
 	natbib=true,					% 	- allow natbib commands
 	hyperref=true,					% 	- activate hyperref support
 	backref=true,					% 	- activate backrefs

@@ -1,14 +1,26 @@
 % !TEX root = ../main.tex
-
-\section{Parameter optimization}%
+% chktex-file 21
+\section{Optimizing Training}%
 \label{sec:params}
+
+Now follows an overview of approaches to speed up the training process.
+We will discuss four approaches:
+\begin{enumerate}
+	\item A general purpose method that combines subsampling with bootstrapping.
+	\item An iterative method to select the optimal subsample size during gradient descent.
+	\item Improving the quality of subsampling for logistic regression by weighing the samples.
+	\item Speeding up the training of SVMs via \(k\)-means clustering.
+\end{enumerate}
 
 \subsection{Bag of Little Bootstraps}%
 \label{sec:params:blb}
 
-\citet{Kleiner2011}
+The first approach we will discuss is called \textit{Bag of Little Bootstraps}~\cite{Kleiner2011}.
+It combines subsampling with bootstrapping and is particularly well suited for parallelized implementations.
 
-\subsection{Sample Size Selection}%
+\textit{TODO:\@ explain BLB}
+
+\subsection{Subsample Size Selection for Gradient Descent}%
 \label{sec:params:samplesize}
 
 \citet{Byrd2012}
@@ -16,9 +28,26 @@
 \subsection{Subsampling for Logistic Regression}%
 \label{sec:params:osmac}
 
-\citet{Wang2017}
+Subsampling usually increases the mean squared error (MSE) of the resulting hypothesis compared to one that is trained on the full dataset.
+OSMAC~\cite{Wang2017} is a method that improves upon na{\"\i}ve subsampling by weighing the samples.
 
-\subsection{Local Learning}%
-\label{sec:params:locallearn}
+\textit{TODO:\@ explain OSMAC}
 
-\citet{Al-Jarrah2015}
+\subsection{SVM-KM}%
+\label{sec:params:svmkm}
+
+To speed up the training of SVMs \citet{Almeida2000} proposed a simple method that reduces the dataset size via \(k\)-means clustering.
+It can be described as a three-step procedure:
+\begin{enumerate}
+	\item Group the training samples \(\Dtrain\) into \(k\) clusters \(C_1, \dots, C_k\) with centers \(c_1, \dots, c_k\) where \(k\) should be determined via hyperparameter optimization.
+	\item Check for each cluster \(C_i\) whether all associated datapoints belong to the same class, i.~e.\@ \(\exists\, z \in \{+1, -1\}: \forall (x, y) \in C_i: y = z\).
+		If yes, all datapoints in \(C_i\) are removed from \(\Dtrain\) and replaced by \(c_i\).
+		If not, they are kept in the dataset.
+		The intuition behind this is that clusters with points from multiple classes might be near the decision boundary so they are kept to serve as potential support vectors.
+	\item Finally standard SVM training is performed on the reduced training dataset.
+\end{enumerate}
+
+\subsubsection{Evaluation}%
+\label{sec:params:svmkm:eval}
+
+\textit{TODO}
