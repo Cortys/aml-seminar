@@ -23,7 +23,18 @@ It combines subsampling with bootstrapping and is particularly well suited for p
 \subsection{Subsample Size Selection for Gradient Descent}%
 \label{sec:params:samplesize}
 
-\citet{Byrd2012}
+Next we will discuss gradient descent based optimization.
+The sample size \(S\) that describes the number of datapoints that are considered in a single gradient descent step heavily influences the optimizer's behavior:
+\begin{itemize}
+	\item In the stochastic approximation regime small samples, typically \(S = 1\), are used. This causes fast but noisy steps.
+	\item In the batch regime large samples, typically \(S = |\Dtrain|\), are used. Steps are expensive to compute but more reliable.
+\end{itemize}
+Both extremes are usually not suitable for Big Data applications.
+Very small samples cannot be parallelized well, making them a bad fit for the compute clusters that are typically available nowadays.
+The gradients for very big samples however are often too slow to compute.
+\(S\) should ideally lie somewhere in between.
+
+\citet{Byrd2012} describe an iterative algorithm that dynamically increases \(S\) as long as this promises to significantly reduce the gradient noise.
 
 \subsection{Subsampling for Logistic Regression}%
 \label{sec:params:osmac}
