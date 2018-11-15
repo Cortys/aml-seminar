@@ -25,10 +25,10 @@ There are multiple ways to reduce the total cost of those evaluations:
 \subsection{FABOLAS}%
 \label{sec:hyperparams:fabolas}
 
-The first approach we will discuss is called FABOLAS (Fast Bayesian Optimization of Machine Learning Hyperparameters on Large Datasets)~\cite{Klein2016}.
+The first approach we will discuss is called Fabolas (Fast Bayesian Optimization of Machine Learning Hyperparameters on Large Datasets)~\cite{Klein2016}.
 It can be applied to any learner \(L\) and is based upon two main ideas:
 \begin{enumerate}
-	\item The validation loss \(l\) is modeled as a \textit{Gaussian process} (GP) \(f\) based on the assumption that two configurations \(\lambda_1\) and \(\lambda_2\) will perform similar if they are similar according to some kernel \(k(\lambda_1, \lambda_2)\).
+	\item The validation loss \(l\) is modeled as a \textit{Gaussian process} (GP) \(f\) based on the assumption that two configurations \(\lambda\) and \(\lambda'\) will perform similar if they are similar according to some kernel \(k(\lambda, \lambda')\).
 		The Gaussian process \(f\) is used as a surrogate to estimate the expected value and variance of \(l\) given \(\lambda\).
 		Using \textit{Bayesian optimization} \(l\) will be probed at promising positions to iteratively improve \(f\).
 		Hyperparameter configurations that are expected to perform worse than the current optimum will not be probed.
@@ -42,26 +42,45 @@ We will now describe how those two ideas can be applied.
 \subsubsection{Gaussian processes}%
 \label{sec:hyperparams:fabolas:gaussian}
 
-A Gaussian process is a family of random variables \({(X_\theta)}_{\theta \in \Theta}\), s.~t.\@ every finite subset of them follows a multivariate normal distribution.
-It is described by a prior mean function \(\mu_0(\theta) = \mathbb{E}[X_\theta]\) and a positive-definite kernel \(k(\theta_1, \theta_2) = \mathit{Cov}(X_{\theta_1}, X_{\theta_2})\).
+A Gaussian process is a family of \textit{random variables} (RVs) \({(X_\theta)}_{\theta \in \Theta}\), s.~t.\@ every finite subset of them follows a multivariate normal distribution.
+More intuitively it can be understood as a probability distribution over functions \(f: \Theta \to \mathbb{R}\) where \(X_\theta \mathrel{\widehat{=}} f(\theta)\).
+Prior knowledge about the likelihood of each \(f\) is described by a prior mean function \(\mu_0(\theta) = \mathbb{E}[f(\theta)]\) and a positive-definite kernel \(k(\theta_1, \theta_2) = \mathrm{Cov}(f(\theta_1), f(\theta_2))\).
 Let \(\mathcal{D}_n = {\{(\bm{\theta}_i, \bm{y}_i)\}}_{i = 1}^{n}\) denote a set of observations.
-Those observations can be used to update the means and variances of the RVs via Gaussian process regression:
+Those observations can be used to update the means and variances of the RVs via GP regression.
+This collapses the space of possible functions \(f\) to those functions that align with \(\mathcal{D}_n\):
 \begin{align}
 	\bm{m} :=&\ {(\mu_0(\bm{\theta}_1), \dots, \mu_0(\bm{\theta}_n))}^T \nonumber \\
 	\bm{k}(\theta) :=&\ {(k(\bm{\theta}_1, \theta), \dots, k(\bm{\theta}_n, \theta))}^T \nonumber \\
 	\bm{K} \in&\ \mathbb{R}^{n \times n}, \bm{K}_{ij} := k(\bm{\theta}_i, \bm{\theta}_j) \nonumber \\
-	\mathbb{E}[X_\theta | \mathcal{D}_n] :=&\ \mu_n(\theta) = m_0(\theta) + \bm{k}{(\theta)}^T \bm{K}^{-1} (\bm{y} - \bm{m}) \\
-	\mathit{Cov}(X_\theta, X_{\theta'} | \mathcal{D}_n) :=&\ k(\theta, \theta') - \bm{k}{(\theta)}^T \bm{K}^{-1} \bm{k}(\theta')
+	\mathbb{E}[f(\theta)\, |\, \mathcal{D}_n] :=&\ \mu_n(\theta) = m_0(\theta) + \bm{k}{(\theta)}^T \bm{K}^{-1} (\bm{y} - \bm{m}) \\
+	\mathrm{Cov}(f(\theta), f(\theta')\, |\, \mathcal{D}_n) :=&\ k(\theta, \theta') - \bm{k}{(\theta)}^T \bm{K}^{-1} \bm{k}(\theta')
 \end{align}
 
-FABOLAS works by modeling the loss function \(l\) as a Gaussian process \(f \sim \mathcal{GP}(m, k)\) with parameter set \(\Theta := \Lambda \times [0, 1]\) where \(\mu_0(\lambda, s) = \mathbb{E}[l(\lambda)\, |\, \text{relative training set size}\ s]\).
+Fabolas works by modeling the loss function \(l\) as a Gaussian process \(f \sim \mathcal{GP}(m, k)\) with parameter set \(\Theta := \Lambda \times [0, 1]\) where \(\mu_0(\lambda, s) = \mathbb{E}[f(\lambda, s)] = \mathbb{E}[l(\lambda)\, |\, \text{training size}\ s]\).
 To model the covariances between different combinations of hyperparameters and training set sizes, the following product kernel is used:
 \begin{align}
-	k((\lambda, s), (\lambda', s')) :=&\ k_{\nicefrac{5}{2}}(\lambda, \lambda') \cdot (\phi^T(s) \cdot \Sigma_{\phi} \cdot \phi(s')) \\
-	k_{\nicefrac{5}{2}}(\lambda, \lambda') :=&\ \beta \left(1 + \sqrt{5}\, d(\lambda, \lambda') + \frac{5}{3} d^2(\lambda, \lambda')\right) e^{- \sqrt{5}\, d(\lambda, \lambda')}
+	k((\lambda, s), (\lambda', s')) :=&\ k_{\nicefrac{5}{2}}(d(\lambda, \lambda')) \cdot k_{\mathrm{lin}}(s, s')
 \end{align}
+Here \(k_{\nicefrac{5}{2}}\) denotes the stationary Matérn kernel with \(d\) being the Mahalanobis distance between the two compared hyperparameter configurations.
+\(k_{\mathrm{lin}}\) essentially is a simple linear kernel modeling the assumption that \(l\) monotonically decreases when \(s\) is increased.
+Figure~\ref{fig:fabolas:mahalanobis} gives an intuition for this choice of kernel.
+We refer to~\citet{Klein2016} for the details.
+\begin{figure}
+	\centering
+	\includegraphics[width=0.75\linewidth]{gfx/fabolas/mahalanobisDistance.pdf}
+	\caption{
+		Intuition for the Mahalanobis distance.
+		Using the Euclidean distance the red points would be equally far away from the blue one.
+		The Mahalanobis distance fixes this by first normalizing hyperparameters.
+	}\label{fig:fabolas:mahalanobis}
+\end{figure}
+\begin{figure}
+	\centering
+	\includegraphics[width=0.75\linewidth]{gfx/fabolas/matern.pdf}
+	\caption{
 
-\textit{TODO:\@ explain the kernel (Matérn kernel, Mahalanobis distance etc.)}
+	}\label{fig:fabolas:matern}
+\end{figure}
 
 \subsubsection{Bayesian optimization}%
 \label{sec:hyperparams:fabolas:bayesian}
@@ -71,17 +90,21 @@ This is called Bayesian optimization.
 The estimated minimum after \(n\) probes is described by \(\arg\min_\lambda \mu_n(\lambda, s = 1)\), i.~e.\@ the configuration with the smallest predicted error on the full test dataset.
 To reduce the number of probes required until this minimum converges, an \textit{acquisition function} is used.
 Its role is to trade-off exploration vs.\@ exploitation of \(l\) by describing the expected utility of probing \((\lambda_{n+1}, s_{n+1})\) given a set of previous probes \(\mathcal{D}_n\).
-FABOLAS uses an aquisition function that rates configurations by their \textit{information gain} per computation time:
+Fabolas uses an aquisition function that rates configurations by their \textit{information gain} per computation time.
+It measures the expected amount of available information, i.~e.\@ entropy \(H\), about the optimal configuration if a given configuration were probed.
+computation time \(c\) of a given configuration via a separate Gaussian process
 \begin{align}
-	a_F(\lambda, s) := \frac{1}{c(\lambda, s)} \mathbb{E}_y\Biggl[ p(y\, |\, \lambda, s, \mathcal{D}_n)\ \cdot &\int p(\hat{\lambda} \in \arg\min_{\lambda'}{l(\lambda')}\, |\, \mathcal{D}_n \cup \{(\lambda, s, y)\}) \\
-	\cdot&\ \log\frac{p(\hat{\lambda} \in \arg\min_{\lambda'}{l(\lambda')}\, |\, \mathcal{D}_n \cup \{(\lambda, s, y)\})}{u(\hat{\lambda})} \mathrm{d}\hat{\lambda}\, \Biggr] \nonumber
+	a_F(\lambda, s) :=&\ \frac{1}{c(\lambda, s)} \mathbb{E}_y\left[ p(y\, |\, \lambda, s, \mathcal{D}_n)\ \cdot \mathrm{H}_{\hat{\lambda}}(p_{\min}(\hat{\lambda}\, |\, \mathcal{D}_n \cup \{(\lambda, s, y)\}))\right] \\
+	p_{\min}(\lambda\, |\, \mathcal{D}) :=&\ p(\lambda \in \arg\min_{\lambda'}{f(\lambda', s = 1)}\, |\, \mathcal{D}) \nonumber
 \end{align}
-\textit{TODO:\@ explain the aquisition function (Kullback-Leibler divergence, cost estimation model)}
+Since it is infeasible to compute \(a_F\) numerically its maximum is estimated using \textit{Markov-Chain Monte Carlo} (MCMC).
+The estimated most promising configuration will be probed.
+The resulting loss value and runtime are then used to update the loss model \(f\) and cost model \(c\) via GP regression.
 
 \subsubsection{Evaluation}%
 \label{sec:hyperparams:fabolas:eval}
 
-\begin{figure}[h]
+\begin{figure}
 	\begin{subfigure}{0.5\textwidth}
 		\centering
 		\includegraphics[width=0.85\linewidth]{gfx/fabolas/time1.png}
@@ -90,7 +113,7 @@ FABOLAS uses an aquisition function that rates configurations by their \textit{i
 		\centering
 		\includegraphics[width=0.95\linewidth]{gfx/fabolas/size.png}
 	\end{subfigure}
-	\caption{\textit{TODO}}\label{fig:fabolas}
+	\caption{\textit{TODO}}\label{fig:fabolas:eval}
 \end{figure}
 
 \subsection{Learning Curve Extrapolation}%

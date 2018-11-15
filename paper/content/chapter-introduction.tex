@@ -12,20 +12,25 @@ The training time of learners is usually polynomially dependent on the size of t
 Since training has to be repeated for every iteration of cross-validation and hyperparameter search, always using the entire dataset quickly becomes infeasible.
 This paper gives an overview of approaches to tackle this problem with a focus on the domain of classification problems.
 
-The process of finding a model can in general be split into two phases:
+The process of finding a hypothesis can in general be split into three phases:
 \begin{enumerate}
+	\item \textbf{Model selection:}
+		At first a model has to be selected that determines the class of hypothesis spaces out of which the final hypothesis will be selected.
+		The choice of model is often implicitly encoded in a learner \(L\).
+		Automating this step is non-trivial.
+		In practice the model is typically selected by experts with domain specific knowledge about the problem at hand.
 	\item \textbf{Hyperparameter search:}
-		Optimizing a vector \(\lambda\) in the hyperparameter space \(\Lambda_L\) of a learner \(L\) representing a hypothesis space \(\mathcal{H}_{\lambda}\).
+		Optimizing a vector \(\lambda\) in the hyperparameter space \(\Lambda_L\) of the learner \(L\) representing a hypothesis space \(\mathcal{H}_{\lambda}\).
 		A na{\"\i}ve approach to do this is to systematically try configurations using a grid search or a random search over \(\Lambda_L\).
 		To evaluate the quality of a given \(\lambda\), \(L\) is usually trained on a training dataset \(\Dtrain\) using \(\lambda\). This yields a hypothesis \(\hat{h}_\lambda \in \mathcal{H}_{\lambda}\) that is evaluated using a validation dataset \(\Dvalid\).
 		The goal of hyperparameter optimization is to minimize the loss \(l(\lambda)\) of \(\hat{h}_\lambda\) on \(\Dvalid\), i.~e.\@ to find an approximation \(\hat{\lambda}\) of \(\lambda^* := \arg\min_{\lambda}{l(\lambda)}\).
 	\item \textbf{Training or parameter search:}
 		Let \(w\) be a vector in the parameter space \(W_{\mathcal{H}_\lambda}\), describing a hypothesis \(h_{\lambda, w} \in \mathcal{H}_\lambda\) given a hyperparameter configuration \(\lambda\).
-		The goal of parameter search is to find an approximation \(\hat{h}_\lambda\) of the hypothesis \(h^*_\lambda := \arg\min_{h_{\lambda, w}}{e(\Dtrain | h_{\lambda, w})}\), with \(e(\Dtrain | h_{\lambda, w})\) being the empirical error of \(h_{\lambda, w}\) on a given training dataset \(\Dtrain\) according to some error measure.
+		The goal of parameter search is to find an approximation \(\hat{h}_\lambda\) of the hypothesis \(h^*_\lambda := \arg\min_{h_{\lambda, w}}{\ell(\Dtrain | h_{\lambda, w})}\), with \(\ell(\Dtrain | h_{\lambda, w})\) being the empirical loss of \(h_{\lambda, w}\) on a given training dataset \(\Dtrain\) according to some loss function \(\ell\).
 		Depending on the learner \(L\), various kinds of optimization methods are used to find this minimum, e.~g.\@ Bayesian optimization, quadratic programming or, if \(\nabla_w e(\Dtrain | h_{\lambda, w})\) is computable, gradient descent.
-		The quality \(l\) of \(\hat{h}_\lambda\) is measured by the loss on a validation or test dataset, i.~e.\@ \(l(\lambda) := e(\Dvalid | \hat{h}_\lambda)\).
+		The quality \(l\) of \(\hat{h}_\lambda\) is measured by the loss on a validation or test dataset, i.~e.\@ \(l(\lambda) := \ell(\Dvalid | \hat{h}_\lambda)\).
 \end{enumerate}
-This paper is structured according to those two phases.
+This paper is structured according to the last two phases, i.~e.\@ we will assume that the learner \(L\) is given.
 Section~\ref{sec:hyperparams} describes ways to speed up the hyperparameter search.
 Section~\ref{sec:params} then describes how to improve the training methods of existing learners.
-Most of the techniques described in this paper improve upon independent components of the model finding process allowing them to be combined.
+Most of the techniques described in this paper improve upon independent components of the hypothesis finding process allowing them to be combined.
