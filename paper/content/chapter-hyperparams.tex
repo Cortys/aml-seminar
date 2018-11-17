@@ -169,6 +169,79 @@ It can in principle be applied to any iterative learner and can be integrated in
 The idea is to monitor the learning curve of a learner during training with a hyperparameter configuration \(\lambda\).
 If it is unlikely that a good accuracy will be reached with \(\lambda\), training will be terminated before convergence.
 
-The method was first described by \citet{Domhan2015} in the context of hyperparameter optimization for \textit{deep neural networks} (DNNs) that are trained using stochastic gradient descent.
+The method was first described by \citet{Domhan2015} in the context of hyperparameter optimization for \textit{deep neural networks} (DNNs) that are trained using \textit{stochastic gradient descent} (SGD).
 
-\textit{TODO:\@ explain the extrapolation model}
+Let \(y_{1:n}\) denote the observed learning curve of SGD after \(n\) iterations, i~e.\@ the sequence of training accuracies \(y_i \in [0, 1]\).
+Normally SGD iterations would be run for each hyperparameter configuration \(\lambda\) until convergence or until a maximum number of iterations \(E\) has been reached.
+The learning curve extrapolation optimization works by predicting \(y_E\) every \(p\) iterations:
+\begin{algorithmic}[1]
+\State{\(\hat{y} \gets -\infty\)}
+\For{\(\lambda \gets\) next hyperparameter configuration to check}
+	\State{\(n \gets 0\)}
+	\Repeat\
+		\State{Run \(p\) SGD iterations using \(\lambda\) with resulting accuracies \(y_{(n + 1):(n + p)}\).}
+		\State{\(n \gets n + p\)}
+		\State{Estimate \(P(y_E < \hat{y}\, |\, y_{1:n})\).}\label{line:earlyterm:estimate}
+	\Until{\(\text{SGD converged} \lor n \geq E \lor P(y_E < \hat{y}\, |\, y_{1:n}) > \delta\)}
+	\State{\algorithmicif\ \(y_n > \hat{y}\) \algorithmicthen\ \(\hat{y} \gets y_n\) \algorithmicend\ \algorithmicif}
+\EndFor\
+\end{algorithmic}
+The prediction step (line~\ref{line:earlyterm:estimate}) uses a probabilistic model.
+Similar to Fabolas, a distribution over candidate functions is fit to the observations \(y_{1:n}\).
+Unlike Fabolas however, which uses a flexible non-parametric GP model, we use prior knowledge about the shape of learning curves to restrict the model to increasing, saturating functions.
+More specifically, the learning curve \(y_{1:n}\) is modeled as a linear combination \(f_{\mathit{comb}}\) of a family of given functions:
+\begin{align}
+	f_{\mathit{comb}}(t\, |\, \xi) :=&\ \sum_{k = 1}^{K} w_k f_k(t\, |\, \theta_k),\
+	\xi = (w_1, \dots, w_k, \theta_1, \dots, \theta_k, \sigma^2) \\
+	y_t =&\ f_{\mathit{comb}}(t\, |\, \xi) + \epsilon,\ \epsilon \sim \mathcal{N}(0, \sigma^2)
+\end{align}
+\citet{Domhan2015} use \(K = 11\) types of functions \(\{f_1, \dots, f_K\}\) that are each parameterized by \(\{\theta_1, \dots, \theta_K\}\).
+The assumption is that every function type captures certain aspects of learning curves.
+By allowing linear combinations a more powerful model can be obtained.
+Figure~\ref{fig:earlyterm:models} illustrates this idea.
+\begin{figure}
+	\centering
+	\includegraphics[width=0.75\linewidth]{gfx/earlyterm/models.png}
+	\caption{
+		Comparison of an observed learning curve (black) with the 11 types of learning curve models and a linear combination of them.
+		Each type is parameterized to fit the first 50 observations \(y_{1:50}\).
+		As can be seen in the legend on the left, the linear combination has the smallest deviation \(\Delta y\) from the observed data after 300 iterations.
+	}\label{fig:earlyterm:models}
+\end{figure}
+
+To estimate the probability \(P(y_E < \hat{y}\, |\, y_{1:n})\) MCMC is used to sample \(S\) learning curves \(\{\xi_1, \dots, \xi_S\}\) from the posterior
+\begin{align}
+	P(\xi\, |\, y_{1:n}) \propto&\ P(y_{1:n}\, |\, \xi) P(\xi) \\
+	P(y_{1:n}\, |\, \xi) =&\ \prod_{t = 1}^{n} \mathcal{N}(y_t; f_{\mathit{comb}}(t\, |\, \xi), \sigma^2) \\
+	P(\xi) \propto&\ \mathbb{1}[f_{\mathit{comb}}(1\, |\, \xi) < f_{\mathit{comb}}(E\, |\, \xi) \land \forall k: w_k > 0]
+\end{align}
+The prior on \(\xi\) is used to model the fact that learning curves do not typically decrease over time.
+Given the learning curve samples, we can now estimate
+\begin{align}
+	P(y_E < \hat{y}\, |\, y_{1:n}) =&\ \int P(\xi\, |\, y_{1:n}) P(y_E < \hat{y}\, |\, \xi)\, \mathrm{d}\xi \\
+	\approx&\ \frac{1}{S} \sum_{s = 1}^S \Phi(\hat{y}; f_{\mathit{comb}}(E\, |\, \xi_s), \sigma^2) \nonumber
+\end{align}
+
+\subsubsection{Evaluation}%
+\label{sec:hyperparams:earlyterm:eval}
+
+The early termination method we just described was evaluated on the CIFAR-10, CIFAR-100 and MNIST dataset.
+Figure~\ref{fig:earlyterm:eval} shows the behavior of early termination and the obtained speedup on CIFAR-10.
+As expected, configurations with learning curves that tend to approach low accuracies are terminated early.
+Configurations with high accuracies are run until convergence.
+This approach is consistently speeds up the hyperparameter optimization by a factor of two across the tested datasets while reaching the same quality.
+\begin{figure}
+	\begin{subfigure}{0.5\textwidth}
+		\centering
+		\includegraphics[width=0.75\linewidth]{gfx/earlyterm/samples.png}
+	\end{subfigure}
+	\begin{subfigure}{0.5\textwidth}
+		\centering
+		\includegraphics[width=\linewidth]{gfx/earlyterm/time.png}
+	\end{subfigure}
+	\caption{
+		Evaluation on the CIFAR-10 dataset.
+		The left graph shows the learning curves of all hyperparameter configurations that were evaluated.
+		The right graph shows the average obtained speedup.
+	}\label{fig:earlyterm:eval}
+\end{figure}
