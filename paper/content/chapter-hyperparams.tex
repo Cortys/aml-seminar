@@ -65,13 +65,13 @@ To model the covariances between different combinations of hyperparameters and t
 \end{align}
 Here \(k_{\textsc{Matérn5}}\) denotes the stationary Matérn kernel (\(\nu = \nicefrac{5}{2}\)) with \(d_M\) being the Mahalanobis distance between the two compared hyperparameter configurations.
 \(k_{\mathrm{lin}}\) essentially is a simple linear kernel modeling the assumption that \(l\) monotonically decreases when \(s\) is increased.
-We will now only give an intuition for this choice of kernel and refer to~\citet{Klein2016} for the details.
+We will only give an intuition for this choice of kernel and refer to~\citet{Klein2016} for the details.
 
 The Mahalanobis distance \(d_M\) is used instead of the Euclidean distance because the hyperparameters in a configuration typically use very different scales and are in some cases also correlated.
 Figure~\ref{fig:fabolas:mahalanobis} gives an intuition for this.
 \begin{figure}
 	\centering
-	\includegraphics[width=0.75\linewidth]{gfx/fabolas/mahalanobisDistance.pdf}
+	\includegraphics[width=0.7\linewidth]{gfx/fabolas/mahalanobisDistance.pdf}
 	\caption{
 		Intuition for the Mahalanobis distance.
 		Using the Euclidean distance the red points would be equally far away from the blue one.
@@ -171,12 +171,15 @@ If it is unlikely that a good accuracy will be reached with \(\lambda\), trainin
 
 The method was first described by \citet{Domhan2015} in the context of hyperparameter optimization for \textit{deep neural networks} (DNNs) that are trained using \textit{stochastic gradient descent} (SGD).
 
+\subsubsection{Extrapolation method}%
+\label{sec:hyperparams:earlyterm:method}
+
 Let \(y_{1:n}\) denote the observed learning curve of SGD after \(n\) iterations, i~e.\@ the sequence of training accuracies \(y_i \in [0, 1]\).
 Normally SGD iterations would be run for each hyperparameter configuration \(\lambda\) until convergence or until a maximum number of iterations \(E\) has been reached.
 The learning curve extrapolation optimization works by predicting \(y_E\) every \(p\) iterations:
 \begin{algorithmic}[1]
 \State{\(\hat{y} \gets -\infty\)}
-\For{\(\lambda \gets\) next hyperparameter configuration to check}
+\For{\(\lambda \gets\) next hyperparameter configuration to evaluate}
 	\State{\(n \gets 0\)}
 	\Repeat\
 		\State{Run \(p\) SGD iterations using \(\lambda\) with resulting accuracies \(y_{(n + 1):(n + p)}\).}
@@ -188,12 +191,12 @@ The learning curve extrapolation optimization works by predicting \(y_E\) every 
 \end{algorithmic}
 The prediction step (line~\ref{line:earlyterm:estimate}) uses a probabilistic model.
 Similar to Fabolas, a distribution over candidate functions is fit to the observations \(y_{1:n}\).
-Unlike Fabolas however, which uses a flexible non-parametric GP model, we use prior knowledge about the shape of learning curves to restrict the model to increasing, saturating functions.
-More specifically, the learning curve \(y_{1:n}\) is modeled as a linear combination \(f_{\mathit{comb}}\) of a family of given functions:
+Unlike Fabolas however, which uses a flexible non-parametric GP model, we use prior knowledge about the shape of learning curves to restrict the model to parameterized, increasing, saturating functions.
+More specifically, the learning curve \(y_{1:n}\) is modeled as a linear combination \(f_{\mathit{comb}}\) of a family of given functions.
 \begin{align}
 	f_{\mathit{comb}}(t\, |\, \xi) :=&\ \sum_{k = 1}^{K} w_k f_k(t\, |\, \theta_k),\
 	\xi = (w_1, \dots, w_k, \theta_1, \dots, \theta_k, \sigma^2) \\
-	y_t =&\ f_{\mathit{comb}}(t\, |\, \xi) + \epsilon,\ \epsilon \sim \mathcal{N}(0, \sigma^2)
+	y_t \sim&\ \mathcal{N}(f_{\mathit{comb}}(t\, |\, \xi), \sigma^2)
 \end{align}
 \citet{Domhan2015} use \(K = 11\) types of functions \(\{f_1, \dots, f_K\}\) that are each parameterized by \(\{\theta_1, \dots, \theta_K\}\).
 The assumption is that every function type captures certain aspects of learning curves.
@@ -208,7 +211,6 @@ Figure~\ref{fig:earlyterm:models} illustrates this idea.
 		As can be seen in the legend on the left, the linear combination has the smallest deviation \(\Delta y\) from the observed data after 300 iterations.
 	}\label{fig:earlyterm:models}
 \end{figure}
-
 To estimate the probability \(P(y_E < \hat{y}\, |\, y_{1:n})\) MCMC is used to sample \(S\) learning curves \(\{\xi_1, \dots, \xi_S\}\) from the posterior
 \begin{align}
 	P(\xi\, |\, y_{1:n}) \propto&\ P(y_{1:n}\, |\, \xi) P(\xi) \\
@@ -237,7 +239,7 @@ This approach is consistently speeds up the hyperparameter optimization by a fac
 	\end{subfigure}
 	\begin{subfigure}{0.6\textwidth}
 		\centering
-		\includegraphics[width=0.85\linewidth]{gfx/earlyterm/time.png}
+		\includegraphics[width=0.8\linewidth]{gfx/earlyterm/time.png}
 	\end{subfigure}
 	\caption{
 		Evaluation on the CIFAR-10 dataset.

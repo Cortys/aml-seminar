@@ -15,10 +15,43 @@ We will discuss four approaches:
 \subsection{Bag of Little Bootstraps}%
 \label{sec:params:blb}
 
-The first approach we will discuss is called \textit{Bag of Little Bootstraps}~\cite{Kleiner2011}.
+The first approach we will discuss is called \textit{Bag of Little Bootstraps}~(BLB)~\cite{Kleiner2011}.
 It combines subsampling with bootstrapping and is particularly well suited for parallelized implementations.
 
-\textit{TODO:\@ explain BLB}
+In the context of Big Data training typically cannot be performed on the entire dataset.
+A na{\"\i}ve way to solve this problem is to simply train on a random \(b\) out of \(n\) subsample of the data \(\Dtrain = \{X_1, \dots, X_n\}\).
+This approach is highly sensitive to noise in the training dataset, especially if \(b \ll n\).
+To overcome this problem bootstrapping can be used.
+The regular \(n\) out of \(n\) bootstrapping technique for variance reduction is not suitable for big datasets because it uses \(63\%\) of the training data on average.
+However the \(b\) out of \(n\) bootstrapping approach can in principle be applied.
+It uses \(s\) samples \(\{\check{X}^{(i)} = (\check{X}_1^{(i)}, \dots, \check{X}_b^{(i)})\, |\, 1 \leq i \leq s\}\).
+Since this approach independently learns \(s\) hypotheses \(\check{h}_i\) on small datasets \(\check{X}^{(i)}\), their parameterizations \(\check{\theta}_i\) tend to have large confidence intervals.
+Because of that, the quality of the combined hypothesis is strongly dependent on \(b\).
+BLB reduces this dependence.
+
+\subsubsection{Intuition}%
+\label{sec:params:blb:intuition}
+
+BLB is a simple extension of the \(b\) out of \(n\) bootstrap that is consistently more robust regarding the choice \(b\) across datasets.
+The basic idea is to add another sampling step.
+BLB uses each subsample \(\check{X}^{(i)}\) as a seed for \(n\) out of \(b\) sampling.
+This yields samples \(\{X^{*(i, k)} = (X_1^{*(i, k)}, \dots, X_n^{*(i, k)})\, |\, 1 \leq i \leq s, 1 \leq k \leq r\}\) that each contain at most \(b\) different elements.
+Training is then run on the big samples \(X^*\) instead of the small seed samples \(\check{X}\).
+
+\subsubsection{Evaluation}%
+\label{sec:params:blb:eval}
+
+\begin{figure}
+	\begin{subfigure}{0.5\textwidth}
+		\centering
+		\includegraphics[width=0.9\linewidth]{gfx/blb/time1.pdf}
+	\end{subfigure}
+	\begin{subfigure}{0.5\textwidth}
+		\centering
+		\includegraphics[width=0.9\linewidth]{gfx/blb/time2.pdf}
+	\end{subfigure}
+	\caption{}\label{fig:blb:eval}
+\end{figure}
 
 \subsection{Subsample Size Selection for Gradient Descent}%
 \label{sec:params:samplesize}
