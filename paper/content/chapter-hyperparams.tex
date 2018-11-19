@@ -215,7 +215,7 @@ To estimate the probability \(P(y_E < \hat{y}\, |\, y_{1:n})\) MCMC is used to s
 \begin{align}
 	P(\xi\, |\, y_{1:n}) \propto&\ P(y_{1:n}\, |\, \xi) P(\xi) \\
 	P(y_{1:n}\, |\, \xi) =&\ \prod_{t = 1}^{n} \mathcal{N}(y_t; f_{\mathit{comb}}(t\, |\, \xi), \sigma^2) \\
-	P(\xi) \propto&\ \mathbb{1}[f_{\mathit{comb}}(1\, |\, \xi) < f_{\mathit{comb}}(E\, |\, \xi) \land \forall k: w_k > 0]
+	P(\xi) \propto&\ \mathbbm{1}[f_{\mathit{comb}}(1\, |\, \xi) < f_{\mathit{comb}}(E\, |\, \xi) \land \forall k: w_k > 0]
 \end{align}
 The prior on \(\xi\) is used to model the fact that learning curves do not typically decrease over time.
 Given the learning curve samples, we can now estimate

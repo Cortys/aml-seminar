@@ -23,20 +23,32 @@ A na{\"\i}ve way to solve this problem is to simply train on a random \(b\) out 
 This approach is highly sensitive to noise in the training dataset, especially if \(b \ll n\).
 To overcome this problem bootstrapping can be used.
 The regular \(n\) out of \(n\) bootstrapping technique for variance reduction is not suitable for big datasets because it uses \(63\%\) of the training data on average.
-However the \(b\) out of \(n\) bootstrapping approach can in principle be applied.
-It uses \(s\) samples \(\{\check{X}^{(i)} = (\check{X}_1^{(i)}, \dots, \check{X}_b^{(i)})\, |\, 1 \leq i \leq s\}\).
-Since this approach independently learns \(s\) hypotheses \(\check{h}_i\) on small datasets \(\check{X}^{(i)}\), their parameterizations \(\check{\theta}_i\) tend to have large confidence intervals.
+However the \textit{\(b\) out of \(n\) bootstrapping} (BOFN) approach can in principle be applied.
+It uses \(s\) samples \(\{\check{X}^{(i)} = (\check{X}_1^{(i)}, \dots, \check{X}_b^{(i)})\, |\, 1 \leq i \leq s\}\) of \(b\) datapoints each.
+Since this approach independently learns \(s\) hypotheses \(h_i\) on small datasets \(\check{X}^{(i)}\), their parameterizations \(\theta_i\) tend to have large confidence intervals.
 Because of that, the quality of the combined hypothesis is strongly dependent on \(b\).
 BLB reduces this dependence.
 
 \subsubsection{Intuition}%
 \label{sec:params:blb:intuition}
 
-BLB is a simple extension of the \(b\) out of \(n\) bootstrap that is consistently more robust regarding the choice \(b\) across datasets.
+BLB is a simple extension of BOFN that is consistently more robust regarding the choice \(b\) across datasets.
 The basic idea is to add another sampling step.
 BLB uses each subsample \(\check{X}^{(i)}\) as a seed for \(n\) out of \(b\) sampling.
-This yields samples \(\{X^{*(i, k)} = (X_1^{*(i, k)}, \dots, X_n^{*(i, k)})\, |\, 1 \leq i \leq s, 1 \leq k \leq r\}\) that each contain at most \(b\) different elements.
-Training is then run on the big samples \(X^*\) instead of the small seed samples \(\check{X}\).
+This yields bigger resamples \(\{X^{*(i, k)} = (X_1^{*(i, k)}, \dots, X_n^{*(i, k)})\, |\, 1 \leq i \leq s, 1 \leq k \leq r\}\) that each contain at most \(b\) different elements.
+Training is then run on the resamples \(X^*\) instead of the small seed samples \(\check{X}\).
+The learned hypothesis parameterizations are finally combined to a single hypothesis parameterization \(\theta^*\) via a model specific combination function, e.~g.\@ by simply taking the average.
+Figure~\ref{fig:blb:overview} illustrates those steps.
+\begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{gfx/blb/overview.pdf}
+	\caption{Overview of the steps of BLB.}\label{fig:blb:overview}
+\end{figure}
+
+Even though BLB trains classifiers on resamples of size \(n\) its time and space complexity effectively still depends on \(b\), not \(n\).
+This is because each resample \(X^*\) only contains at most \(b\) different elements which means that it can be efficiently represented by a list of \(b\) multiplicity counts \((c_1, \dots, c_b) \in \mathbb{N}^b\), i.~e.\@ \(\mathit{space} = \mathcal{O}(b \log n)\).
+Training on such a dataset is equivalent to training on a dataset of size \(b\) with weights \(w_i = \frac{c_i}{n}\).
+Since most commonly used classifiers support weighted samples, BLB is widely applicable and, because of the independence of the resamples, easily parallelizable.
 
 \subsubsection{Evaluation}%
 \label{sec:params:blb:eval}
@@ -50,7 +62,11 @@ Training is then run on the big samples \(X^*\) instead of the small seed sample
 		\centering
 		\includegraphics[width=0.9\linewidth]{gfx/blb/time2.pdf}
 	\end{subfigure}
-	\caption{}\label{fig:blb:eval}
+	\caption{
+		Comparison of BLB and BOFN with regular \(n\) out of \(n\) bootstrapping (BOOT) using logistic regression.
+		The error on the average of all sample hypotheses that were computed within a given time is shown.
+		\(b = n^\gamma\) for multiple values of \(\gamma \in [0, 1]\) is used.
+	}\label{fig:blb:eval}
 \end{figure}
 
 \subsection{Subsample Size Selection for Gradient Descent}%
