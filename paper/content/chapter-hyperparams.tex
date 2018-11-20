@@ -112,7 +112,7 @@ This information gain of a probe is compared to its expected associated computat
 \(c\) is estimated using a separate Gaussian process that is maintained alongside \(f\).
 Fabolas considers the cost of a probe because it tries to minimize the total optimization time not the total number of probes.
 
-Since it is infeasible to compute \(a_F\) numerically its maximum is estimated using \textit{Markov-Chain Monte Carlo} (MCMC).
+Since it is infeasible to compute \(a_F\) numerically, its maximum is estimated using \textit{Markov-Chain Monte Carlo} (MCMC).
 The estimated most promising configuration will be probed.
 The resulting loss value and runtime are then used to update the loss model \(f\) and cost model \(c\) via GP regression.
 

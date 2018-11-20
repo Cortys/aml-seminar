@@ -1,4 +1,5 @@
 % !TEX root = ../main.tex
+% chktex-file 17
 % chktex-file 21
 \section{Optimizing Training}%
 \label{sec:params}
@@ -91,18 +92,55 @@ The much larger BOOT samples, on the other hand, require disk reads for large da
 \subsection{Subsample Size Selection for Gradient Descent}%
 \label{sec:params:samplesize}
 
-Next we will discuss gradient descent based optimization.
-The sample size \(S\) that describes the number of datapoints that are considered in a single gradient descent step heavily influences the optimizer's behavior:
+Next we will discuss an optimization technique for \textit{stochastic gradient descent} (SGD).
+The size of the subsample \(\mathcal{S}\) that is considered in a single gradient descent step heavily influences the optimizer's behavior:
 \begin{itemize}
-	\item In the stochastic approximation regime small samples, typically \(S = 1\), are used. This causes fast but noisy steps.
-	\item In the batch regime large samples, typically \(S = |\Dtrain|\), are used. Steps are expensive to compute but more reliable.
+	\item In the stochastic approximation regime small samples, typically \(|\mathcal{S}| = 1\), are used. This causes fast but noisy steps.
+	\item In the batch regime large samples are used, typically \(|\mathcal{S}| = N\) with \(N := |\Dtrain|\). Steps are expensive to compute but more reliable.
 \end{itemize}
 Both extremes are usually not suitable for Big Data applications.
 Very small samples cannot be parallelized well, making them a bad fit for the compute clusters that are typically available nowadays.
 The gradients for very big samples however are often too slow to compute.
-\(S\) should ideally lie somewhere in between.
+\(|\mathcal{S}|\) should ideally lie somewhere in between.
 
-\citet{Byrd2012} describe an iterative algorithm that dynamically increases \(S\) as long as this promises to significantly reduce the gradient noise.
+\subsubsection{Size Selection Method}%
+\label{sec:params:samplesize:method}
+
+\citet{Byrd2012} describe an iterative algorithm that dynamically increases the size of \(\mathcal{S}\) as long as this promises to significantly reduce the gradient noise.
+Let \(\mathcal{S} \subseteq \{1, \dots, N\}\) describe a random subsample of \(\Dtrain = \{(x_i, y_i)\, |\, 1 \leq i \leq N\}\).
+SGD will take a step in the descent direction \(d = -\nabla J_{\mathcal{S}}(w)\) where \(J_{\mathcal{S}}(w) := \frac{1}{|\mathcal{S}|} \sum_{i \in \mathcal{S}} \ell(h_{w}(x_i), y_i)\) is the differentiable average loss on \(\mathcal{S}\) given the current configuration \(w\).
+Let \(J(w)\) be the average loss on the entire dataset.
+\(J(w)\) is the objective function we want to minimize.
+Our goal is to trade off \(|\mathcal{S}|\) s.~t.\@ it is as small as possible and \(\nabla J_{\mathcal{S}}\) still \textit{tends to agree} with the objective gradient \(\nabla J(w)\), or more formally
+\begin{align}
+	\|\nabla J_{\mathcal{S}}(w) - \nabla J(w) \|_2 \leq \theta \|\nabla J_{\mathcal{S}}(w)\|_2, \theta \in [0, 1)\label{eq:samplesize:cond} % chktex 9
+\end{align}
+A value of \(\theta = 0\) means that \(\nabla J_{\mathcal{S}}(w)\) always has to be equal to \(\nabla J(w)\),
+whereas \(\theta = 1\) would allow steps that directy oppose \(\nabla J(w)\).
+Since it is infeasible to compute \(\nabla J(w)\), condition (\ref{eq:samplesize:cond}) can however not be checked directly.
+We will instead resort to an estimate and check whether the condition is satisfied in expectation:
+\begin{align}
+	\underbrace{\mathbb{E}_{\mathcal{S}}[\|\nabla J_{\mathcal{S}}(w) - \nabla J(w) \|_2^2]}_{= \|\mathrm{Var}_{\mathcal{S}}(\nabla J_{\mathcal{S}}(w))\|_1} \leq \theta^2 \|\nabla J_{\mathcal{S}}(w)\|_2^2\label{eq:samplesize:exp}
+\end{align}
+Computing \(\mathrm{Var}_{\mathcal{S}}(\nabla J_{\mathcal{S}}(w))\) directly is also infeasible because it would require considering all samples of a certain size.
+Given a sample \(\mathcal{S}\), the variance of all samples of that size can instead be approximated using
+\begin{align}
+	\|\mathrm{Var}_{\mathcal{S}}(\nabla J_{\mathcal{S}}(w))\|_1 \approx \frac{1}{|\mathcal{S}| (|\mathcal{S}| - 1)} \sum_{i \in \mathcal{S}} \|\nabla \ell(h_w(x_i), y_i) - \nabla J_{\mathcal{S}}(w)\|_2^2\label{eq:samplesize:approx}
+\end{align}
+Using (\ref{eq:samplesize:approx}) we can now estimate (\ref{eq:samplesize:exp}) which in turn estimates (\ref{eq:samplesize:cond}).
+If the condition is not satisfied, i.~e.\@ the sample gradient is likely to deviate from the objective gradient, we will have to use a larger sample \(\widehat{\mathcal{S}}\).
+In principle we could simply increase the sample size by a constant amount repeatedly and recheck (\ref{eq:samplesize:exp}) but this is slow if \(|\mathcal{S}|\) is far off from satisfying the condition.
+Instead we will adaptively choose \(|\widehat{\mathcal{S}}|\) s.~t.\@ it is expected to satisfy (\ref{eq:samplesize:exp}):
+\begin{align}
+	|\widehat{\mathcal{S}}| = \frac{|\mathcal{S}|\, \|\mathrm{Var}_{\mathcal{S}}(\nabla J_{\mathcal{S}}(w))\|_1}{\theta^2 \|\nabla J_{\mathcal{S}(w)}\|_2^2}\label{eq:samplesize:inc}
+\end{align}
+See \citet[Chapter 3]{Byrd2012} for a more detailed explanation of (\ref{eq:samplesize:approx}) and (\ref{eq:samplesize:inc}).
+To incorporate the ideas described above into SGD (\ref{eq:samplesize:exp}) has to be checked after each gradient descent step.
+If the check fails, the size of the following samples has to be increased according to (\ref{eq:samplesize:approx}).
+Good values for the initial sample size and for \(\theta\) have to be found via hyperparameter optimization.
+
+\subsubsection{Evaluation}%
+\label{sec:params:samplesize:eval}
 
 \subsection{Subsampling for Logistic Regression}%
 \label{sec:params:osmac}
