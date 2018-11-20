@@ -230,8 +230,8 @@ Given the learning curve samples, we can now estimate
 The early termination method we just described was evaluated on the CIFAR-10, CIFAR-100 and MNIST dataset.
 Figure~\ref{fig:earlyterm:eval} shows the behavior of early termination and the obtained speedup on CIFAR-10.
 As expected, configurations with learning curves that tend to approach low accuracies are terminated early.
-Configurations with high accuracies are run until convergence.
-This approach is consistently speeds up the hyperparameter optimization by a factor of two across the tested datasets while reaching the same quality.
+Configurations with high accuracies are evaluated until convergence.
+This approach consistently speeds up the hyperparameter optimization by a factor of two across the tested datasets while reaching the same quality.
 \begin{figure}
 	\begin{subfigure}{0.4\textwidth}
 		\centering
