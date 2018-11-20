@@ -32,6 +32,11 @@ BLB reduces this dependence.
 \subsubsection{Intuition}%
 \label{sec:params:blb:intuition}
 
+\begin{figure}
+	\centering
+	\includegraphics[width=\linewidth]{gfx/blb/overview.pdf}
+	\caption{Overview of the steps of BLB.}\label{fig:blb:overview}
+\end{figure}
 BLB is a simple extension of BOFN that is consistently more robust regarding the choice \(b\) across datasets.
 The basic idea is to add another sampling step.
 BLB uses each subsample \(\check{X}^{(i)}\) as a seed for \(n\) out of \(b\) sampling.
@@ -39,33 +44,47 @@ This yields bigger resamples \(\{X^{*(i, k)} = (X_1^{*(i, k)}, \dots, X_n^{*(i, 
 Training is then run on the resamples \(X^*\) instead of the small seed samples \(\check{X}\).
 The learned hypothesis parameterizations are finally combined to a single hypothesis parameterization \(\theta^*\) via a model specific combination function, e.~g.\@ by simply taking the average.
 Figure~\ref{fig:blb:overview} illustrates those steps.
-\begin{figure}
-	\centering
-	\includegraphics[width=\linewidth]{gfx/blb/overview.pdf}
-	\caption{Overview of the steps of BLB.}\label{fig:blb:overview}
-\end{figure}
 
 Even though BLB trains classifiers on resamples of size \(n\) its time and space complexity effectively still depends on \(b\), not \(n\).
 This is because each resample \(X^*\) only contains at most \(b\) different elements which means that it can be efficiently represented by a list of \(b\) multiplicity counts \((c_1, \dots, c_b) \in \mathbb{N}^b\), i.~e.\@ \(\mathit{space} = \mathcal{O}(b \log n)\).
 Training on such a dataset is equivalent to training on a dataset of size \(b\) with weights \(w_i = \frac{c_i}{n}\).
-Since most commonly used classifiers support weighted samples, BLB is widely applicable and, because of the independence of the resamples, easily parallelizable.
+Since most commonly used classifiers support weighted samples, BLB is widely applicable.
 
 \subsubsection{Evaluation}%
 \label{sec:params:blb:eval}
 
+To show the advantages of BLB for classification it was evaluated with logistic regression.
+Figure~\ref{fig:blb:eval:single} shows that BLB converges on a solution much faster than the regular \(n\) out of \(n\) bootstrapping (BOOT) with comparable results.
+It also shows that BLB is less sensitive to the choice of \(b\) than BOFN.\
+BLB reached good results with \(b \geq n^{0.6}\) whereas BOFN required at least \(b \geq n^{0.7}\).
+
+While BLB already outperforms BOOT without parallelism, as training is overproportionally faster on small samples, its scalability becomes more apparent when parallelized.
+Figure~\ref{fig:blb:eval:parallel} shows that BLB significantly outperforms BOOT on a Spark cluster with 10 workers.
+This is due to the fact that each BLB sample can be held in memory by its corresponding worker node.
+The much larger BOOT samples, on the other hand, require disk reads for large datasets.
 \begin{figure}
-	\begin{subfigure}{0.5\textwidth}
+	\begin{subfigure}[t]{0.67\textwidth}
 		\centering
-		\includegraphics[width=0.9\linewidth]{gfx/blb/time1.pdf}
+		\includegraphics[width=0.49\linewidth]{gfx/blb/time1.pdf}
+		\includegraphics[width=0.49\linewidth]{gfx/blb/time2.pdf}
+		\caption{
+			Single-threaded results on a subset of the data.
+			\(b = n^\gamma\) for multiple values of \(\gamma \in [0.5, 1]\) and \(r = 100\) is used.
+			\(s\) is not fixed and grows over time.
+		}\label{fig:blb:eval:single}
 	\end{subfigure}
-	\begin{subfigure}{0.5\textwidth}
+	\begin{subfigure}[t]{0.32\textwidth}
 		\centering
-		\includegraphics[width=0.9\linewidth]{gfx/blb/time2.pdf}
+		\includegraphics[width=\linewidth]{gfx/blb/parallel.pdf}
+		\caption{
+			Parallelized results on the entire dataset.
+			\(b = n^{0.7}\), \(s = 5\) and \(r = 50\) is used for BLB.\
+			For BOOT \(s\) grows over time.
+		}\label{fig:blb:eval:parallel}
 	\end{subfigure}
 	\caption{
-		Comparison of BLB and BOFN with regular \(n\) out of \(n\) bootstrapping (BOOT) using logistic regression.
-		The error on the average of all sample hypotheses that were computed within a given time is shown.
-		\(b = n^\gamma\) for multiple values of \(\gamma \in [0, 1]\) is used.
+		Comparison of BLB and BOFN with BOOT using logistic regression.
+		Shows the error on the moving average of all sample hypotheses that are computed within a given time.
 	}\label{fig:blb:eval}
 \end{figure}
 
