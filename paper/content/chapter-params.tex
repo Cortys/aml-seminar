@@ -128,34 +128,90 @@ Given a sample \(\mathcal{S}\), the variance of all samples of that size can ins
 	\|\mathrm{Var}_{\mathcal{S}}(\nabla J_{\mathcal{S}}(w))\|_1 \approx \frac{1}{|\mathcal{S}| (|\mathcal{S}| - 1)} \sum_{i \in \mathcal{S}} \|\nabla \ell(h_w(x_i), y_i) - \nabla J_{\mathcal{S}}(w)\|_2^2\label{eq:samplesize:approx}
 \end{align}
 Using (\ref{eq:samplesize:approx}) we can now estimate (\ref{eq:samplesize:exp}) which in turn estimates (\ref{eq:samplesize:cond}).
-If the condition is not satisfied, i.~e.\@ the sample gradient is likely to deviate from the objective gradient, we will have to use a larger sample \(\widehat{\mathcal{S}}\).
+If we estimate that (\ref{eq:samplesize:exp}) is not satisfied, i.~e.\@ that the sample gradient is likely to deviate significantly from the objective gradient, a larger sample \(\widehat{\mathcal{S}}\) has to be used.
 In principle we could simply increase the sample size by a constant amount repeatedly and recheck (\ref{eq:samplesize:exp}) but this is slow if \(|\mathcal{S}|\) is far off from satisfying the condition.
 Instead we will adaptively choose \(|\widehat{\mathcal{S}}|\) s.~t.\@ it is expected to satisfy (\ref{eq:samplesize:exp}):
 \begin{align}
 	|\widehat{\mathcal{S}}| = \frac{|\mathcal{S}|\, \|\mathrm{Var}_{\mathcal{S}}(\nabla J_{\mathcal{S}}(w))\|_1}{\theta^2 \|\nabla J_{\mathcal{S}(w)}\|_2^2}\label{eq:samplesize:inc}
 \end{align}
-See \citet[Chapter 3]{Byrd2012} for a more detailed explanation of (\ref{eq:samplesize:approx}) and (\ref{eq:samplesize:inc}).
+See \citet[chapter~3]{Byrd2012} for a more detailed explanation of (\ref{eq:samplesize:approx}) and (\ref{eq:samplesize:inc}).
 To incorporate the ideas described above into SGD (\ref{eq:samplesize:exp}) has to be checked after each gradient descent step.
 If the check fails, the size of the following samples has to be increased according to (\ref{eq:samplesize:approx}).
 Good values for the initial sample size and for \(\theta\) have to be found via hyperparameter optimization.
 
+The idea outlined above can similarly also be applied to other gradient based optimization methods like the curvature-aware \textit{Newton Conjugate Gradient} (NCG) method.
+It not only uses \(\nabla J_{\mathcal{S}}(w)\) but also information from the Hessian \(\nabla^2 J_{\mathcal{S}}(w)\) to compute the direction \(d\) of the next step.
+We refer to \citet[chapter~5]{Byrd2012} for the details.
+
 \subsubsection{Evaluation}%
 \label{sec:params:samplesize:eval}
 
-\begin{tikzpicture}
-	\begin{axis}[
-		xmin=0, xmax=8,
-		ymin=0, ymax=0.14,
-		xtick distance=1,
-		ytick distance=0.02,
-		y tick label style={/pgf/number format/.cd, fixed},
-		xlabel={No.\@ of Accessed Data Points}
-	]
-		\addplot table [x=x, y=FG5, col sep=comma] {data/samplesize/performance.csv};
-		\addplot table [x=x, y=FG100, col sep=comma] {data/samplesize/performance.csv};
-		\addplot table [x=x, y=Dynamic, col sep=comma] {data/samplesize/performance.csv};
-	\end{axis}
-\end{tikzpicture}
+Subsample size selection was evaluated on a multi-class logistic regression problem using NCG for optimization.
+
+Figure~\ref{fig:samplesize:eval}
+
+\begin{figure}
+	\begin{subfigure}{0.5\textwidth}
+		\begin{tikzpicture}
+			\begin{axis}[
+				width=\linewidth,
+				height=0.8\linewidth,
+				xmin=0, xmax=6,
+				ymin=0.03, ymax=0.14,
+				xtick distance=1,
+				ytick distance=0.02,
+				xlabel={Total Number of Sampled Points \(\times 10^5\)},
+				ylabel={Likelihood of \(\Dtrain\)},
+				axis x line=bottom,
+				axis y line=left,
+				label style={font=\tiny},
+				tick label style={font=\tiny},
+				y tick label style={/pgf/number format/.cd, fixed},
+				legend style={
+					at={(0.95,0.05)},
+					anchor=south east,
+					nodes={scale=0.6, transform shape}
+				}
+			]
+				\addplot table [x=x, y=FG5, col sep=comma] {data/samplesize/performance.csv};
+				\addplot table [x=x, y=FG100, col sep=comma] {data/samplesize/performance.csv};
+				\addplot table [x=x, y=Dynamic, col sep=comma] {data/samplesize/performance.csv};
+				\legend{Fixed \(|\mathcal{S}|\) to 5\%,Fixed \(|\mathcal{S}|\) to 100\%,{Dynamic \(|\mathcal{S}|\), \(\theta = 0.5\)}}
+			\end{axis}
+		\end{tikzpicture}
+	\end{subfigure}
+	\begin{subfigure}{0.5\textwidth}
+		\begin{tikzpicture}
+			\begin{axis}[
+				width=\linewidth,
+				height=0.8\linewidth,
+				xmin=0, xmax=6,
+				ymin=0.03, ymax=0.14,
+				xtick distance=1,
+				ytick distance=0.02,
+				xlabel={Total Number of Sampled Points \(\times 10^5\)},
+				ylabel={Likelihood of \(\Dtrain\)},
+				axis x line=bottom,
+				axis y line=left,
+				label style={font=\tiny},
+				tick label style={font=\tiny},
+				y tick label style={/pgf/number format/.cd, fixed},
+				legend style={
+					at={(0.95,0.05)},
+					anchor=south east,
+					nodes={scale=0.6, transform shape}
+				}
+			]
+				\addplot table [x=x, y=10, col sep=comma] {data/samplesize/theta.csv};
+				\addplot table [x=x, y=25, col sep=comma] {data/samplesize/theta.csv};
+				\addplot table [x=x, y=50, col sep=comma] {data/samplesize/theta.csv};
+				\addplot table [x=x, y=75, col sep=comma] {data/samplesize/theta.csv};
+				\legend{\(\theta = 0.1\), \(\theta = 0.25\), \(\theta = 0.5\), \(\theta = 0.75\)}
+			\end{axis}
+		\end{tikzpicture}
+	\end{subfigure}
+	\caption{}\label{fig:samplesize:eval}
+\end{figure}
 
 \subsection{Subsampling for Logistic Regression}%
 \label{sec:params:osmac}

@@ -11,7 +11,7 @@
         </Export>
         <AxesChecker Mode="1" Seconds="3" LineColor="6"/>
         <GridDisplay Stable="True" DisableX="0" CountX="9" StartX="0" StepX="1" StopX="8" DisableY="0" CountY="4" StartY="0" StepY="0.05" StopY="0.15" Color="0" ColorString="Black"/>
-        <GridRemoval Stable="False" DefinedGridLines="False" CloseDistance="10" CoordDisableX="0" CoordDisableXString="Count" CountX="14" StartX="-0.669309" StepX="0.664516" StopX="7.96939" CoordDisableY="0" CoordDisableYString="Count" CountY="26" StartY="-0.00028709" StepY="0.00584943" StopY="0.145949"/>
+        <GridRemoval Stable="False" DefinedGridLines="False" CloseDistance="10" CoordDisableX="0" CoordDisableXString="Count" CountX="6" StartX="0.0690418" StepX="1.49516" StopX="7.54485" CoordDisableY="0" CoordDisableYString="Count" CountY="3" StartY="0.0172613" StepY="0.0421774" StopY="0.101616"/>
         <PointMatch PointSize="20" ColorAccepted="6" ColorAcceptedString="Red" ColorCandidate="7" ColorCandidateString="Yellow" ColorRejected="4" ColorRejectedString="Green"/>
         <Segments PointSeparation="25" MinLength="2" FillCorners="False" LineWidth="4" LineColor="4" LineColorString="Green"/>
         <Curve CurveName="Axes">
@@ -22,16 +22,16 @@
             </CurveStyle>
             <CurvePoints>
                 <Point Identifier="Axes&#9;point&#9;1" Ordinal="1" IsAxisPoint="True" IsXOnly="False" Index="149">
-                    <PositionScreen X="73.0204" Y="374.23"/>
-                    <PositionGraph X="0" Y="0"/>
+                    <PositionScreen X="73.4653" Y="342.573"/>
+                    <PositionGraph X="0" Y="0.04"/>
                 </Point>
                 <Point Identifier="Axes&#9;point&#9;3" Ordinal="2" IsAxisPoint="True" IsXOnly="False" Index="149">
-                    <PositionScreen X="507.571" Y="374.627"/>
-                    <PositionGraph X="8" Y="0"/>
+                    <PositionScreen X="507.821" Y="342.377"/>
+                    <PositionGraph X="8" Y="0.04"/>
                 </Point>
                 <Point Identifier="Axes&#9;point&#9;5" Ordinal="3" IsAxisPoint="True" IsXOnly="False" Index="149">
-                    <PositionScreen X="73.4173" Y="32.1449"/>
-                    <PositionGraph X="0" Y="0.14"/>
+                    <PositionScreen X="73.4173" Y="32.4599"/>
+                    <PositionGraph X="0.04" Y="0.14"/>
                 </Point>
             </CurvePoints>
         </Curve>
