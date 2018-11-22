@@ -42,7 +42,7 @@ BLB is a simple extension of BOFN that is consistently more robust regarding the
 The basic idea is to add another sampling step.
 BLB uses each subsample \(\check{X}^{(i)}\) as a seed for \(n\) out of \(b\) sampling.
 This yields bigger resamples \(\{X^{*(i, k)} = (X_1^{*(i, k)}, \dots, X_n^{*(i, k)})\, |\, 1 \leq i \leq s, 1 \leq k \leq r\}\) that each contain at most \(b\) different elements.
-Training is then run on the resamples \(X^*\) instead of the small seed samples \(\check{X}\).
+Training is then run on the resamples \(X^*\) instead of the small seed samples \(\check{X}\).tildetilde
 The learned hypothesis parameterizations are finally combined to a single hypothesis parameterization \(\theta^*\) via a model specific combination function, e.~g.\@ by simply taking the average.
 Figure~\ref{fig:blb:overview} illustrates those steps.
 
@@ -109,9 +109,9 @@ The gradients for very big samples however are often too slow to compute.
 \citet{Byrd2012} describe an iterative algorithm that dynamically increases the size of \(\mathcal{S}\) as long as this promises to significantly reduce the gradient noise.
 Let \(\mathcal{S} \subseteq \{1, \dots, N\}\) describe a random subsample of \(\Dtrain = \{(x_i, y_i)\, |\, 1 \leq i \leq N\}\).
 SGD will take a step in the descent direction \(d = -\nabla J_{\mathcal{S}}(w)\) where \(J_{\mathcal{S}}(w) := \frac{1}{|\mathcal{S}|} \sum_{i \in \mathcal{S}} \ell(h_{w}(x_i), y_i)\) is the differentiable average loss on \(\mathcal{S}\) given the current configuration \(w\).
-Let \(J(w)\) be the average loss on the entire dataset.
+Let \(J(w)\) be the average loss on the entire dataset \(\Dtrain\).
 \(J(w)\) is the objective function we want to minimize.
-Our goal is to trade off \(|\mathcal{S}|\) s.~t.\@ it is as small as possible and \(\nabla J_{\mathcal{S}}\) still \textit{tends to agree} with the objective gradient \(\nabla J(w)\), or more formally
+Our goal is to trade off \(|\mathcal{S}|\) s.~t.\@ it is as small as possible and \(\nabla J_{\mathcal{S}}(w)\) still \textit{tends to agree} with the objective gradient \(\nabla J(w)\), or more formally
 \begin{align}
 	\|\nabla J_{\mathcal{S}}(w) - \nabla J(w) \|_2 \leq \theta \|\nabla J_{\mathcal{S}}(w)\|_2, \theta \in [0, 1)\label{eq:samplesize:cond} % chktex 9
 \end{align}
@@ -123,10 +123,11 @@ We will instead resort to an estimate and check whether the condition is satisfi
 	\underbrace{\mathbb{E}_{\mathcal{S}}[\|\nabla J_{\mathcal{S}}(w) - \nabla J(w) \|_2^2]}_{= \|\mathrm{Var}_{\mathcal{S}}(\nabla J_{\mathcal{S}}(w))\|_1} \leq \theta^2 \|\nabla J_{\mathcal{S}}(w)\|_2^2\label{eq:samplesize:exp}
 \end{align}
 Computing \(\mathrm{Var}_{\mathcal{S}}(\nabla J_{\mathcal{S}}(w))\) directly is also infeasible because it would require considering all samples of a certain size.
-Given a sample \(\mathcal{S}\), the variance of all samples of that size can instead be approximated using
+Given a sample \(\mathcal{S}\), the variance of all samples of that size can instead be approximated by
 \begin{align}
 	\|\mathrm{Var}_{\mathcal{S}}(\nabla J_{\mathcal{S}}(w))\|_1 \approx \frac{1}{|\mathcal{S}| (|\mathcal{S}| - 1)} \sum_{i \in \mathcal{S}} \|\nabla \ell(h_w(x_i), y_i) - \nabla J_{\mathcal{S}}(w)\|_2^2\label{eq:samplesize:approx}
 \end{align}
+This approximation assumes that \(|\mathcal{S}| \ll N\).
 Using (\ref{eq:samplesize:approx}) we can now estimate (\ref{eq:samplesize:exp}) which in turn estimates (\ref{eq:samplesize:cond}).
 If we estimate that (\ref{eq:samplesize:exp}) is not satisfied, i.~e.\@ that the sample gradient is likely to deviate significantly from the objective gradient, a larger sample \(\widehat{\mathcal{S}}\) has to be used.
 In principle we could simply increase the sample size by a constant amount repeatedly and recheck (\ref{eq:samplesize:exp}) but this is slow if \(|\mathcal{S}|\) is far off from satisfying the condition.
@@ -147,9 +148,15 @@ We refer to \citet[chapter~5]{Byrd2012} for the details.
 \label{sec:params:samplesize:eval}
 
 Subsample size selection was evaluated on a multi-class logistic regression problem using NCG for optimization.
+At first we look at the accuracy of the estimation of (\ref{eq:samplesize:cond}) via (\ref{eq:samplesize:approx}) and (\ref{eq:samplesize:exp}).
+On average \(\|\mathrm{Var}_{\mathcal{S}}(\nabla J_{\mathcal{S}}(w))\|_1\) deviates about 4\% from \(\|\nabla J_{\mathcal{S}}(w) - \nabla J(w) \|_2\) on the evaluation dataset if \(|\mathcal{S}| \ll N\).
 
-Figure~\ref{fig:samplesize:eval}
-
+Figure~\ref{fig:samplesize:eval} shows that this accuracy is sufficient.
+Dynamic subsample size selection reaches the same quality as the batch method (fixed \(|\mathcal{S}| = N\)) while using significantly fewer datapoints.
+This in turn makes it significantly faster.
+The speed of convergence however does depend on the choice of \(\theta\).
+If \(\theta\) is too small (see \(\theta = 0.1\)), \(|\mathcal{S}|\) is increased quickly which slows down the optimization.
+If \(\theta\) is too big (see \(\theta = 0.75\)), \(\nabla J_{\mathcal{S}}(w)\) is allowed to deviate significantly from \(\nabla J(w)\) which causes more erratic gradient steps.
 \begin{figure}
 	\begin{subfigure}{0.5\textwidth}
 		\begin{tikzpicture}
@@ -160,7 +167,7 @@ Figure~\ref{fig:samplesize:eval}
 				ymin=0.03, ymax=0.14,
 				xtick distance=1,
 				ytick distance=0.02,
-				xlabel={Total Number of Sampled Points \(\times 10^5\)},
+				xlabel={Total Number of Accessed Datapoints \(\times 10^6\)},
 				ylabel={Likelihood of \(\Dtrain\)},
 				axis x line=bottom,
 				axis y line=left,
@@ -171,12 +178,13 @@ Figure~\ref{fig:samplesize:eval}
 					at={(0.95,0.05)},
 					anchor=south east,
 					nodes={scale=0.6, transform shape}
-				}
+				},
+				legend cell align={left}
 			]
 				\addplot table [x=x, y=FG5, col sep=comma] {data/samplesize/performance.csv};
 				\addplot table [x=x, y=FG100, col sep=comma] {data/samplesize/performance.csv};
 				\addplot table [x=x, y=Dynamic, col sep=comma] {data/samplesize/performance.csv};
-				\legend{Fixed \(|\mathcal{S}|\) to 5\%,Fixed \(|\mathcal{S}|\) to 100\%,{Dynamic \(|\mathcal{S}|\), \(\theta = 0.5\)}}
+				\legend{Fixed \(|\mathcal{S}| = 0.05 N\),Fixed \(|\mathcal{S}| = N\),{Dynamic \(|\mathcal{S}|\), \(\theta = 0.5\)}}
 			\end{axis}
 		\end{tikzpicture}
 	\end{subfigure}
@@ -189,7 +197,7 @@ Figure~\ref{fig:samplesize:eval}
 				ymin=0.03, ymax=0.14,
 				xtick distance=1,
 				ytick distance=0.02,
-				xlabel={Total Number of Sampled Points \(\times 10^5\)},
+				xlabel={Total Number of Accessed Datapoints \(\times 10^6\)},
 				ylabel={Likelihood of \(\Dtrain\)},
 				axis x line=bottom,
 				axis y line=left,
@@ -200,7 +208,8 @@ Figure~\ref{fig:samplesize:eval}
 					at={(0.95,0.05)},
 					anchor=south east,
 					nodes={scale=0.6, transform shape}
-				}
+				},
+				legend cell align={left}
 			]
 				\addplot table [x=x, y=10, col sep=comma] {data/samplesize/theta.csv};
 				\addplot table [x=x, y=25, col sep=comma] {data/samplesize/theta.csv};
@@ -210,7 +219,11 @@ Figure~\ref{fig:samplesize:eval}
 			\end{axis}
 		\end{tikzpicture}
 	\end{subfigure}
-	\caption{}\label{fig:samplesize:eval}
+	\caption{
+		Results on a multi-class logistic regression task using NCG.\
+		(Left) Comparison of dynamic subsample size selection with fixed sample sizes.
+		(Right) Comparison of different values for \(\theta\).
+	}\label{fig:samplesize:eval}
 \end{figure}
 
 \subsection{Subsampling for Logistic Regression}%
