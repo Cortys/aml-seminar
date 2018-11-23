@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE engauge>
+<Document VersionNumber="10.11" AxesPointsRequired="0">
+    <Image Width="508" Height="351"><![CDATA[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]]></Image>
+    <CoordSystem>
+        <General CursorSize="3" ExtraPrecision="1"/>
+        <Coords Type="0" TypeString="Cartesian" Coords="0" ScaleXTheta="0" ScaleXThetaString="Linear" ScaleYRadius="0" ScaleYRadiusString="Linear" UnitsX="0" UnitsXString="Number" UnitsY="0" UnitsYString="Number" UnitsTheta="0" UnitsThetaString="Degrees (DDD.DDDDD)" UnitsRadius="0" UnitsRadiusString="Number" UnitsDate="3" UnitsDateString="YYYY/MM/DD" UnitsTime="2" UnitsTimeString="HH:MM:SS"/>
+        <DigitizeCurve CursorInnerRadius="5" CursorLineWidth="2" CursorSize="1" CursorStandardCross="True"/>
+        <Export PointsSelectionFunctions="1" PointsSelectionFunctionsString="InterpolateFirstCurve" PointsIntervalFunctions="10" PointsIntervalUnitsFunctions="1" PointsSelectionRelations="0" PointsSelectionRelationsString="Interpolate" PointsIntervalUnitsRelations="1" PointsIntervalRelations="10" LayoutFunctions="0" LayoutFunctionsString="AllPerLine" Delimiter="0" OverrideCsvTsv="False" DelimiterString="Commas" Header="1" HeaderString="Simple" XLabel="x">
+            <CurveNamesNotExported/>
+        </Export>
+        <AxesChecker Mode="1" Seconds="3" LineColor="6"/>
+        <GridDisplay Stable="True" DisableX="0" CountX="9" StartX="200" StepX="100" StopX="1000" DisableY="0" CountY="11" StartY="-0.1" StepY="0.1" StopY="0.9" Color="0" ColorString="Black"/>
+        <GridRemoval Stable="False" DefinedGridLines="False" CloseDistance="10" CoordDisableX="0" CoordDisableXString="Count" CountX="17" StartX="-29.6309" StepX="66.5805" StopX="1035.66" CoordDisableY="0" CoordDisableYString="Count" CountY="10" StartY="-0.0135469" StepY="0.0912807" StopY="0.807979"/>
+        <PointMatch PointSize="48" ColorAccepted="4" ColorAcceptedString="Green" ColorCandidate="7" ColorCandidateString="Yellow" ColorRejected="6" ColorRejectedString="Red"/>
+        <Segments PointSeparation="25" MinLength="2" FillCorners="False" LineWidth="4" LineColor="4" LineColorString="Green"/>
+        <Curve CurveName="Axes">
+            <ColorFilter CurveName="Axes" Mode="2" ModeString="Intensity" IntensityLow="0" IntensityHigh="50" ForegroundLow="0" ForegroundHigh="10" HueLow="180" HueHigh="360" SaturationLow="50" SaturationHigh="100" ValueLow="0" ValueHigh="50"/>
+            <CurveStyle CurveName="Axes">
+                <LineStyle Width="0" Color="8" ColorString="Transparent" ConnectAs="4" ConnectAsString="ConnectSkipForAxisCurve"/>
+                <PointStyle Radius="10" LineWidth="1" Color="6" ColorString="Red" Shape="1" ShapeString="Cross"/>
+            </CurveStyle>
+            <CurvePoints>
+                <Point Identifier="Axes&#9;point&#9;1" Ordinal="1" IsAxisPoint="True" IsXOnly="False" Index="26">
+                    <PositionScreen X="147.411" Y="266.788"/>
+                    <PositionGraph X="200" Y="0"/>
+                </Point>
+                <Point Identifier="Axes&#9;point&#9;3" Ordinal="2" IsAxisPoint="True" IsXOnly="False" Index="26">
+                    <PositionScreen X="472.47" Y="266.788"/>
+                    <PositionGraph X="1000" Y="0"/>
+                </Point>
+                <Point Identifier="Axes&#9;point&#9;5" Ordinal="3" IsAxisPoint="True" IsXOnly="False" Index="26">
+                    <PositionScreen X="147.411" Y="36.2227"/>
+                    <PositionGraph X="200" Y="0.8"/>
+                </Point>
+            </CurvePoints>
+        </Curve>
+        <CurvesGraphs>
+            <Curve CurveName="LCC">
+                <ColorFilter CurveName="LCC" Mode="2" ModeString="Intensity" IntensityLow="0" IntensityHigh="50" ForegroundLow="0" ForegroundHigh="10" HueLow="180" HueHigh="360" SaturationLow="50" SaturationHigh="100" ValueLow="0" ValueHigh="50"/>
+                <CurveStyle CurveName="LCC">
+                    <LineStyle Width="1" Color="1" ColorString="Blue" ConnectAs="0" ConnectAsString="FunctionSmooth"/>
+                    <PointStyle Radius="10" LineWidth="1" Color="1" ColorString="Blue" Shape="1" ShapeString="Cross"/>
+                </CurveStyle>
+                <CurvePoints>
+                    <Point Identifier="LCC&#9;point&#9;6" Ordinal="0" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="106.936" Y="42.5223"/>
+                    </Point>
+                    <Point Identifier="LCC&#9;point&#9;7" Ordinal="1" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="147.253" Y="169.617"/>
+                    </Point>
+                    <Point Identifier="LCC&#9;point&#9;8" Ordinal="2" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="187.413" Y="206.312"/>
+                    </Point>
+                    <Point Identifier="LCC&#9;point&#9;9" Ordinal="3" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="269.308" Y="230.251"/>
+                    </Point>
+                    <Point Identifier="LCC&#9;point&#9;10" Ordinal="4" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="350.258" Y="240.645"/>
+                    </Point>
+                    <Point Identifier="LCC&#9;point&#9;11" Ordinal="5" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="472.47" Y="248.204"/>
+                    </Point>
+                </CurvePoints>
+            </Curve>
+            <Curve CurveName="full">
+                <ColorFilter CurveName="full" Mode="2" ModeString="Intensity" IntensityLow="0" IntensityHigh="50" ForegroundLow="0" ForegroundHigh="10" HueLow="180" HueHigh="360" SaturationLow="50" SaturationHigh="100" ValueLow="0" ValueHigh="50"/>
+                <CurveStyle CurveName="full">
+                    <LineStyle Width="1" Color="1" ColorString="Blue" ConnectAs="0" ConnectAsString="FunctionSmooth"/>
+                    <PointStyle Radius="10" LineWidth="1" Color="1" ColorString="Blue" Shape="5" ShapeString="X"/>
+                </CurveStyle>
+                <CurvePoints>
+                    <Point Identifier="full&#9;point&#9;24" Ordinal="0" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="91.5018" Y="261.906"/>
+                    </Point>
+                    <Point Identifier="full&#9;point&#9;25" Ordinal="1" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="487.432" Y="261.906"/>
+                    </Point>
+                </CurvePoints>
+            </Curve>
+            <Curve CurveName="uniform">
+                <ColorFilter CurveName="uniform" Mode="2" ModeString="Intensity" IntensityLow="0" IntensityHigh="50" ForegroundLow="0" ForegroundHigh="10" HueLow="180" HueHigh="360" SaturationLow="50" SaturationHigh="100" ValueLow="0" ValueHigh="50"/>
+                <CurveStyle CurveName="uniform">
+                    <LineStyle Width="1" Color="1" ColorString="Blue" ConnectAs="0" ConnectAsString="FunctionSmooth"/>
+                    <PointStyle Radius="10" LineWidth="1" Color="1" ColorString="Blue" Shape="5" ShapeString="X"/>
+                </CurveStyle>
+                <CurvePoints>
+                    <Point Identifier="uniform&#9;point&#9;18" Ordinal="0" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="105.991" Y="153.395"/>
+                    </Point>
+                    <Point Identifier="uniform&#9;point&#9;19" Ordinal="1" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="147.253" Y="181.744"/>
+                    </Point>
+                    <Point Identifier="uniform&#9;point&#9;20" Ordinal="2" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="187.413" Y="200.957"/>
+                    </Point>
+                    <Point Identifier="uniform&#9;point&#9;21" Ordinal="3" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="269.466" Y="219.699"/>
+                    </Point>
+                    <Point Identifier="uniform&#9;point&#9;22" Ordinal="4" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="350.573" Y="231.196"/>
+                    </Point>
+                    <Point Identifier="uniform&#9;point&#9;23" Ordinal="5" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="472.47" Y="240.015"/>
+                    </Point>
+                </CurvePoints>
+            </Curve>
+            <Curve CurveName="OSMAC">
+                <ColorFilter CurveName="OSMAC" Mode="2" ModeString="Intensity" IntensityLow="0" IntensityHigh="50" ForegroundLow="0" ForegroundHigh="10" HueLow="180" HueHigh="360" SaturationLow="50" SaturationHigh="100" ValueLow="0" ValueHigh="50"/>
+                <CurveStyle CurveName="OSMAC">
+                    <LineStyle Width="1" Color="1" ColorString="Blue" ConnectAs="0" ConnectAsString="FunctionSmooth"/>
+                    <PointStyle Radius="10" LineWidth="1" Color="1" ColorString="Blue" Shape="2" ShapeString="Diamond"/>
+                </CurveStyle>
+                <CurvePoints>
+                    <Point Identifier="OSMAC&#9;point&#9;12" Ordinal="0" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="106.621" Y="176.074"/>
+                    </Point>
+                    <Point Identifier="OSMAC&#9;point&#9;13" Ordinal="1" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="146.938" Y="208.674"/>
+                    </Point>
+                    <Point Identifier="OSMAC&#9;point&#9;14" Ordinal="2" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="188.516" Y="223.321"/>
+                    </Point>
+                    <Point Identifier="OSMAC&#9;point&#9;15" Ordinal="3" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="270.411" Y="238.598"/>
+                    </Point>
+                    <Point Identifier="OSMAC&#9;point&#9;16" Ordinal="4" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="350.416" Y="244.582"/>
+                    </Point>
+                    <Point Identifier="OSMAC&#9;point&#9;17" Ordinal="5" IsAxisPoint="False" IsXOnly="False" Index="26">
+                        <PositionScreen X="472.628" Y="250.724"/>
+                    </Point>
+                </CurvePoints>
+            </Curve>
+        </CurvesGraphs>
+    </CoordSystem>
+</Document>

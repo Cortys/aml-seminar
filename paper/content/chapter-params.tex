@@ -64,7 +64,7 @@ Figure~\ref{fig:blb:eval:parallel} shows that BLB significantly outperforms BOOT
 This is due to the fact that each BLB sample can be held in memory by its corresponding worker node.
 The much larger BOOT samples, on the other hand, require disk reads for large datasets.
 \begin{figure}
-	\begin{subfigure}[t]{0.67\textwidth}
+	\begin{subfigure}[t]{0.66\textwidth}
 		\centering
 		\includegraphics[width=0.49\linewidth]{gfx/blb/time1.pdf}
 		\includegraphics[width=0.49\linewidth]{gfx/blb/time2.pdf}
@@ -74,6 +74,7 @@ The much larger BOOT samples, on the other hand, require disk reads for large da
 			\(s\) is not fixed and grows over time.
 		}\label{fig:blb:eval:single}
 	\end{subfigure}
+	\hfill\
 	\begin{subfigure}[t]{0.32\textwidth}
 		\centering
 		\includegraphics[width=\linewidth]{gfx/blb/parallel.pdf}
@@ -135,9 +136,9 @@ Instead we will adaptively choose \(|\widehat{\mathcal{S}}|\) s.~t.\@ it is expe
 \begin{align}
 	|\widehat{\mathcal{S}}| = \frac{|\mathcal{S}|\, \|\mathrm{Var}_{\mathcal{S}}(\nabla J_{\mathcal{S}}(w))\|_1}{\theta^2 \|\nabla J_{\mathcal{S}(w)}\|_2^2}\label{eq:samplesize:inc}
 \end{align}
-See \citet[chapter~3]{Byrd2012} for a more detailed explanation of (\ref{eq:samplesize:approx}) and (\ref{eq:samplesize:inc}).
+Please refer to \citet[chapter~3]{Byrd2012} for a more detailed explanation of (\ref{eq:samplesize:approx}) and (\ref{eq:samplesize:inc}).
 To incorporate the ideas described above into SGD (\ref{eq:samplesize:exp}) has to be checked after each gradient descent step.
-If the check fails, the size of the following samples has to be increased according to (\ref{eq:samplesize:approx}).
+If the check fails, the size of the following samples has to be increased according to (\ref{eq:samplesize:inc}).
 Good values for the initial sample size and for \(\theta\) have to be found via hyperparameter optimization.
 
 The idea outlined above can similarly also be applied to other gradient based optimization methods like the curvature-aware \textit{Newton Conjugate Gradient} (NCG) method.
@@ -229,10 +230,160 @@ If \(\theta\) is too big (see \(\theta = 0.75\)), \(\nabla J_{\mathcal{S}}(w)\) 
 \subsection{Subsampling for Logistic Regression}%
 \label{sec:params:osmac}
 
-Subsampling usually increases the mean squared error (MSE) of the resulting hypothesis compared to one that is trained on the full dataset.
-OSMAC~\cite{Wang2017} is a method that improves upon na{\"\i}ve subsampling by weighing the samples.
+Subsampling usually increases the \textit{mean squared error} (MSE) of the resulting hypothesis compared to one that is trained on the full dataset \(\Dtrain\).
+Let \(\mathcal{S} := \{{(x^*_i, y^*_i)\}}_{i=1}^{r}\) be a random subsample of \(\Dtrain\) that is drawn with or without replacement according to the probabilities \({\{\pi_i\}}_{i=1}^{N}\) where \(N = |\Dtrain|\) and \(\sum_{i=1}^{N} \pi_i = 1\).
+Usually \(\mathcal{S}\) is drawn from a uniform distribution, i.~e.\@ each datapoint \(x_i\) is drawn with probability \(\pi_i = N^{-1}\).
+Then a \textit{maximum likelihood estimate} (MLE) \(\beta_{\mathcal{S}} = (\beta_{\mathcal{S}}^{(1)}, \dots, \beta_{\mathcal{S}}^{(d)})\) is calculated as an estimate of the objective parameter vector \(\beta_{\Dtrain}\) that maximizes the likelihood of the entire dataset.
+This strategy is often not optimal since some data\-points might have a smaller influence on \(\beta_{\Dtrain}\) than others.
+The core idea now is to choose the probabilities \(\pi_i\) s.~t.\@ more informative datapoints are more likely to be sampled.
 
-\textit{TODO:\@ explain OSMAC}
+\subsubsection{Case Control}%
+\label{sec:params:osmac:cc}
+
+A simple idea to adjust the probabilities is to use \textit{Case-Control subsampling} (CC) in which a roughly equal amount of positive and negative samples is drawn.
+Let \(\Dtrain^+ := \{(x, y) \in \Dtrain\, |\, y = 1\}\) and \(\Dtrain^- := \{(x, y) \in \Dtrain\, |\, y = 0\}\).
+CC samples would be chosen without replacement with probabilities
+\begin{align}
+	\pi_i = \begin{cases}
+		|\Dtrain^+|^{-1} & \mathrm{if}\ y_i = 1 \\
+		|\Dtrain^-|^{-1} & \mathrm{if}\ y_i = 0
+	\end{cases}
+\end{align}
+This approach however is problematic because it introduces a bias towards unambiguous samples (see fig.~\ref{fig:osmac:cc}).
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\textwidth]{gfx/osmac/cc.png}
+	\caption{Illustration of the bias introduced by CC.}\label{fig:osmac:cc}
+\end{figure}
+
+\subsubsection{Local Case Control}%
+\label{sec:params:osmac:lcc}
+
+\citet{Fithian2013} proposed \textit{Local Case-Control subsampling} (LCC) to remove the bias from CC.\
+LCC determines the sampling probabilities \(\pi_i\) via a pilot estimate \(\beta_0\).
+The estimate \(\beta_0\) is the MLE of a small pilot sample \(\mathcal{S}_0\) that is drawn with uniform sample probabilities.
+Datapoints are now weighted by the error of the pilot estimator on them:
+\begin{align}
+	\pi_i = \frac{|y_i - p(x_i\, |\, \beta_0)|}{\sum_{j=1}^{N} |y_j - p(x_j\, |\, \beta_0)|}\
+	\mathrm{with}\ p(x\, |\, \beta) = \frac{1}{1 + \exp(\beta^T x)}
+\end{align}
+Then a sample \(\mathcal{S}_{\mathrm{LCC}}\) is drawn using those probabilities, typically with replacement since this is computationally less expensive.
+This produces an estimate \(\beta_{\mathcal{S}_{\mathrm{LCC}}}\) that is consistent with \(\beta_{\Dtrain}\), i.~e.\@ \(\|\beta_{\mathcal{S}_{\mathrm{LCC}}} - \beta_{\Dtrain}\|_2 \to 0\) as \(r \to \infty\).
+Additionally LCC prioritizes datapoints that are close to the decision boundary estimated by the pilot.
+This tends to reduce the variance of the estimate \(\beta_{\mathcal{S}_{\mathrm{LCC}}}\), especially if \(\Dtrain\) contains an imbalanced amount of positive and negative samples.
+
+\subsubsection{OSMAC}%
+\label{sec:params:osmac:idea}
+
+While LCC tends to reduce the estimate's variance, it does not necessarily minimize it.
+The \textit{\textbf{O}ptimal \textbf{S}ubsampling \textbf{M}otivated by the \textbf{A}-Optimality \textbf{C}riterion} (OSMAC)~\cite{Wang2017} method improves upon LCC by minimizing the expected variance.\
+Like LCC it also uses a pilot estimate \(\beta_0\) but the sampling probabilities \(\pi_i\) are then calculated differently.
+
+Let \(V := \mathrm{Cov}(\beta_{\mathcal{S}} - \beta_{\Dtrain})\) be the covariance matrix of the difference between the sample estimate and the complete dataset estimate.
+Given \(\mathbb{E}[\beta_{\mathcal{S}} - \beta_{\Dtrain}] = \mathbf{0}\), \(V\) can be interpreted as a measure of the expected error introduced by subsampling.
+Using the A-optimality criterion of optimal design, OSMAC sets the sampling probabilities \(\pi_i\) so that \(\mathrm{tr}(V)\) is minimized in expectation.
+More intuitively this minimizes the sum of the MSEs on the regression coefficients \(\beta_{\mathcal{S}}^{(k)}\), i.~e.\@ \(\sum_{k=1}^{d} \mathbb{E}[(\beta_{\mathcal{S}}^{(k)} - \beta_{\Dtrain}^{(k)})^2]\). % chktex 3
+
+It turns out that finding the minimizing probabilities \(\pi_i\) of \(\mathrm{tr}(V)\) is computationally expensive.
+However the optimal values for \(\pi_i\) can be approximated using
+\begin{align}
+	\pi_i = \frac{|y_i - p(x_i\, |\, \beta_0)| \cdot \|x_i\|_2}{\sum_{j=1}^{N} |y_j - p(x_j\, |\, \beta_0)| \cdot \|x_j\|_2}\label{eq:osmac:approx}
+\end{align}
+The only difference to LCC here is the added \(\|x_i\|_2\) factor.
+The intuition behind this is that samples with large norms tend to be further away from the decision boundary%
+\footnote{
+	This intuition is not entirely correct since it does not consider the offset and rotation of the decision boundary.
+	Those aspects are ignored because (\ref{eq:osmac:approx}) only approximates the A-optimal probabilities.
+	For details please refer to \citet[chapter 3.2]{Wang2017}.
+}.
+An incorrectly classified sample that is far from the decision boundary is more surprising than an incorrectly classified sample close to it.
+Since the sigmoidal \(p\) function saturates quickly this fact is often not captured by LCC sampling.
+
+\subsubsection{Evaluation}%
+\label{sec:params:osmac:eval}
+
+We will now compare uniform, LCC and OSMAC sampling on the two datasets.
+The datapoints \(x_i\) are randomly sampled from different distributions.
+The corresponding classes \(y_i \in \{0, 1\}\) are then assigned using a fixed coefficient vector \(\beta\).
+These two datasets are used:
+\begin{itemize}
+	\item \textbf{mzNormal:}
+		Uses a multivariate normal distribution \(\mathcal{N}(0, \Sigma)\) with mean \(0\) and \(\Sigma_{i j} = 0.5^{\delta_{i \neq j}}\).
+		Contains a roughly equal amount of positive and negative samples.
+	\item \textbf{nzNormal:}
+		Uses a multivariate normal distribution \(\mathcal{N}(1.5, \Sigma)\) with mean \(1.5\).
+		About 95\% of the samples are positive.
+\end{itemize}
+
+Figure~\ref{fig:osmac:mse} shows the MSEs \(\|\beta_{\mathcal{S}} - \beta\|_2^2\) for different subsample sizes \(r\).
+OSMAC consistently gives the closest approximation of \(\beta\), confirming its theoretical A-optimality.
+\begin{figure}
+	\begin{subfigure}{0.5\textwidth}
+		\begin{tikzpicture}
+			\begin{axis}[
+				width=\linewidth,
+				height=0.8\linewidth,
+				xmin=100, xmax=1000,
+				ymin=0, ymax=0.8,
+				xtick distance=200,
+				ytick distance=0.2,
+				xlabel={\(r\)},
+				ylabel={MSE},
+				axis x line=bottom,
+				axis y line=left,
+				label style={font=\tiny},
+				tick label style={font=\tiny},
+				y tick label style={/pgf/number format/.cd, fixed},
+				legend style={
+					at={(0.95,0.95)},
+					anchor=north east,
+					nodes={scale=0.6, transform shape}
+				},
+				legend cell align={left}
+			]
+				\addplot table [x=x, y=uniform, col sep=comma] {data/osmac/mse-mzNormal.csv};
+				\addplot table [x=x, y=LCC, col sep=comma] {data/osmac/mse-mzNormal.csv};
+				\addplot table [x=x, y=OSMAC, col sep=comma] {data/osmac/mse-mzNormal.csv};
+				\addplot [dashed] table [x=x, y=full, col sep=comma] {data/osmac/mse-mzNormal.csv};
+				\legend{uniform, LCC, OSMAC, full}
+			\end{axis}
+		\end{tikzpicture}
+		\caption{mzNormal}
+	\end{subfigure}
+	\begin{subfigure}{0.5\textwidth}
+		\begin{tikzpicture}
+			\begin{axis}[
+				width=\linewidth,
+				height=0.8\linewidth,
+				xmin=100, xmax=1000,
+				ymin=0, ymax=2.5,
+				xtick distance=200,
+				ytick distance=0.5,
+				xlabel={\(r\)},
+				ylabel={MSE},
+				axis x line=bottom,
+				axis y line=left,
+				label style={font=\tiny},
+				tick label style={font=\tiny},
+				y tick label style={/pgf/number format/.cd, fixed},
+				legend style={
+					at={(0.95,0.95)},
+					anchor=north east,
+					nodes={scale=0.6, transform shape}
+				},
+				legend cell align={left}
+			]
+				\addplot table [x=x, y=uniform, col sep=comma] {data/osmac/mse-nzNormal.csv};
+				\addplot table [x=x, y=LCC, col sep=comma] {data/osmac/mse-nzNormal.csv};
+				\addplot table [x=x, y=OSMAC, col sep=comma] {data/osmac/mse-nzNormal.csv};
+				\addplot [dashed] table [x=x, y=full, col sep=comma] {data/osmac/mse-nzNormal.csv};
+				\legend{uniform, LCC, OSMAC, full}
+			\end{axis}
+		\end{tikzpicture}
+		\caption{nzNormal}
+	\end{subfigure}
+	\caption{MSEs on \(\beta\) for different subsample sizes \(r\).}\label{fig:osmac:mse}
+\end{figure}
 
 \subsection{SVM-KM}%
 \label{sec:params:svmkm}
