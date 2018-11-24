@@ -42,7 +42,7 @@ BLB is a simple extension of BOFN that is consistently more robust regarding the
 The basic idea is to add another sampling step.
 BLB uses each subsample \(\check{X}^{(i)}\) as a seed for \(n\) out of \(b\) sampling.
 This yields bigger resamples \(\{X^{*(i, k)} = (X_1^{*(i, k)}, \dots, X_n^{*(i, k)})\, |\, 1 \leq i \leq s, 1 \leq k \leq r\}\) that each contain at most \(b\) different elements.
-Training is then run on the resamples \(X^*\) instead of the small seed samples \(\check{X}\).tildetilde
+Training is then run on the resamples \(X^*\) instead of the small seed samples \(\check{X}\).
 The learned hypothesis parameterizations are finally combined to a single hypothesis parameterization \(\theta^*\) via a model specific combination function, e.~g.\@ by simply taking the average.
 Figure~\ref{fig:blb:overview} illustrates those steps.
 
@@ -385,11 +385,11 @@ OSMAC consistently gives the closest approximation of \(\beta\), confirming its 
 	\caption{MSEs on \(\beta\) for different subsample sizes \(r\).}\label{fig:osmac:mse}
 \end{figure}
 
-\subsection{SVM-KM}%
-\label{sec:params:svmkm}
+\subsection{WKM-SVM}%
+\label{sec:params:wkmsvm}
 
 To speed up the training of SVMs \citet{Almeida2000} proposed a simple method that reduces the dataset size via \(k\)-means clustering.
-It can be described as a three-step procedure:
+It can be described as a simple three-step procedure:
 \begin{enumerate}
 	\item Group the training samples \(\Dtrain\) into \(k\) clusters \(C_1, \dots, C_k\) with centers \(c_1, \dots, c_k\) where \(k\) should be determined via hyperparameter optimization.
 	\item Check for each cluster \(C_i\) whether all associated datapoints belong to the same class, i.~e.\@ \(\exists\, z \in \{+1, -1\}: \forall (x, y) \in C_i: y = z\).
@@ -398,8 +398,127 @@ It can be described as a three-step procedure:
 		The intuition behind this is that clusters with points from multiple classes might be near the decision boundary so they are kept to serve as potential support vectors.
 	\item Finally standard SVM training is performed on the reduced training dataset.
 \end{enumerate}
+This approach performs similarly to SVM training on the full dataset.
+However the size of the reduced dataset is very unpredictable.
+Large homogeneous clusters with only a few noisy outliers of a different class will not be used to reduce the dataset size.
+Because of that the effective speedup and memory requirements may vary greatly depending on the dataset.
+
+\citet{Lee2007} proposed KM-SVM, an alternative approach that solves this problem by performing clustering on the datapoints of each class separately.
+This method has more predictable time and memory requirements but it also tends to modify the structure of the dataset.
+Figure~\ref{fig:wkmsvm:compare:km} shows that this can cause KM-SVM to deviate significantly from the full dataset SVM.\
+\begin{figure}
+	\begin{subfigure}{0.5\textwidth}
+		\centering
+		\includegraphics[width=0.85\linewidth]{gfx/wkmsvm/km.png}
+		\caption{KM-SVM}\label{fig:wkmsvm:compare:km}
+	\end{subfigure}
+	\begin{subfigure}{0.5\textwidth}
+		\centering
+		\includegraphics[width=0.85\linewidth]{gfx/wkmsvm/wkm.png}
+		\caption{WKM-SVM}\label{fig:wkmsvm:compare:wkm}
+	\end{subfigure}
+	\caption{Comparison of the decision boundaries of KM-SVM and WKM-SVM.}\label{fig:wkmsvm:compare}
+\end{figure}
+
+WKM-SVM~\cite{Bang2014} improves upon KM-SVM by weighting each cluster center \(c_i\) by the amount of datapoints \(|C_i|\) it represents.
+This solves the problem that small clusters of outliers have the same influence on the decision boundary as big clusters of more representative datapoints in KM-SVM.\
+Figure~\ref{fig:wkmsvm:compare:wkm} shows how this improves the quality of the decision boundary.
 
 \subsubsection{Evaluation}%
-\label{sec:params:svmkm:eval}
+\label{sec:params:wkmsvm:eval}
 
-\textit{TODO}
+We will now compare KM-SVM and WKM-SVM using different compression rates \(R \in \{1, 3, 5, 10\}\) that describe the number of clusters \(k = \frac{|\Dtrain|}{R}\).
+A compression rate of \(R = 1\) corresponds to a SVM that is trained on the entire dataset.
+For \(\Dtrain\) the \texttt{PimaIndiansDiabetes2} dataset is used.
+Figure~\ref{fig:wkmsvm:eval} shows that WKM-SVM consistently performs better than KM-SVM with a roughly identical training time.
+
+\begin{figure}
+	\begin{subfigure}{0.33\textwidth}
+		\begin{tikzpicture}
+			\begin{axis}[
+				width=\linewidth,
+				height=0.8\linewidth,
+				xmin=1, xmax=10,
+				ymin=0.2, ymax=0.3,
+				xtick={1,3,5,10},
+				ytick distance=0.02,
+				xlabel={\(R\)},
+				ylabel={Test error},
+				axis x line=bottom,
+				axis y line=left,
+				label style={font=\tiny},
+				tick label style={font=\tiny},
+				y tick label style={/pgf/number format/.cd, fixed},
+				legend style={
+					at={(0.05,0.95)},
+					anchor=north west,
+					nodes={scale=0.6, transform shape}
+				},
+				legend cell align={left}
+			]
+				\addplot table [x=compression, y=km-err, col sep=comma] {data/wkmsvm/diabetes.csv};
+				\addplot table [x=compression, y=wkm-err, col sep=comma] {data/wkmsvm/diabetes.csv};
+				\legend{KM, WKM}
+			\end{axis}
+		\end{tikzpicture}
+	\end{subfigure}
+	\begin{subfigure}{0.33\textwidth}
+		\begin{tikzpicture}
+			\begin{axis}[
+				width=\linewidth,
+				height=0.8\linewidth,
+				xmin=1, xmax=10,
+				ymin=0, ymax=1250,
+				xtick={1,3,5,10},
+				ytick distance=200,
+				xlabel={\(R\)},
+				ylabel={Training time (sec)},
+				axis x line=bottom,
+				axis y line=left,
+				label style={font=\tiny},
+				tick label style={font=\tiny},
+				y tick label style={/pgf/number format/.cd, fixed},
+				legend style={
+					at={(0.95,0.95)},
+					anchor=north east,
+					nodes={scale=0.6, transform shape}
+				},
+				legend cell align={left}
+			]
+				\addplot table [x=compression, y=km-time, col sep=comma] {data/wkmsvm/diabetes.csv};
+				\addplot table [x=compression, y=wkm-time, col sep=comma] {data/wkmsvm/diabetes.csv};
+				\legend{KM, WKM}
+			\end{axis}
+		\end{tikzpicture}
+	\end{subfigure}
+	\begin{subfigure}{0.32\textwidth}
+		\begin{tikzpicture}
+			\begin{axis}[
+				width=\linewidth,
+				height=0.8\linewidth,
+				xmin=1, xmax=10,
+				ymin=0, ymax=185,
+				xtick={1,3,5,10},
+				ytick distance=25,
+				xlabel={\(R\)},
+				ylabel={Support vectors},
+				axis x line=bottom,
+				axis y line=left,
+				label style={font=\tiny},
+				tick label style={font=\tiny},
+				y tick label style={/pgf/number format/.cd, fixed},
+				legend style={
+					at={(0.95,0.95)},
+					anchor=north east,
+					nodes={scale=0.6, transform shape}
+				},
+				legend cell align={left}
+			]
+				\addplot table [x=compression, y=km-sv, col sep=comma] {data/wkmsvm/diabetes.csv};
+				\addplot table [x=compression, y=wkm-sv, col sep=comma] {data/wkmsvm/diabetes.csv};
+				\legend{KM, WKM}
+			\end{axis}
+		\end{tikzpicture}
+	\end{subfigure}
+	\caption{Comparison of KM-SVM and WKM-SVM.}\label{fig:wkmsvm:eval}
+\end{figure}
