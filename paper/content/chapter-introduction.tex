@@ -16,7 +16,7 @@ The process of finding a hypothesis can in general be split into three phases:
 \begin{enumerate}
 	\item \textbf{Model selection:}
 		At first a model has to be selected that determines the class of hypothesis spaces out of which the final hypothesis will be selected.
-		The choice of model is often implicitly encoded in a learner \(L\).
+		The choice of model is often implicitly encoded in the class of hypothesis spaces of a learner \(L\).
 		Automating this step is non-trivial.
 		In practice the model is typically selected by experts with domain specific knowledge about the problem at hand.
 	\item \textbf{Hyperparameter search:}
@@ -33,4 +33,4 @@ The process of finding a hypothesis can in general be split into three phases:
 This paper is structured according to the last two phases, i.~e.\@ we will assume that the learner \(L\) is given.
 Section~\ref{sec:hyperparams} describes ways to speed up the hyperparameter search.
 Section~\ref{sec:params} then describes how to improve the training methods of existing learners.
-Most of the techniques described in this paper improve upon independent components of the hypothesis finding process allowing them to be combined.
+Most of the techniques described in this paper improve upon independent components of the hypothesis finding process, allowing them to be combined.

@@ -17,7 +17,7 @@ We will discuss four approaches:
 \label{sec:params:blb}
 
 The first approach we will discuss is called \textit{Bag of Little Bootstraps}~(BLB)~\cite{Kleiner2011}.
-It combines subsampling with bootstrapping and is particularly well suited for parallelized implementations.
+It is a bagging method that combines subsampling with bootstrapping and is particularly well suited for parallelized implementations.
 
 In the context of Big Data training typically cannot be performed on the entire dataset.
 A na{\"\i}ve way to solve this problem is to simply train on a random \(b\) out of \(n\) subsample of the data \(\Dtrain = \{X_1, \dots, X_n\}\).
@@ -317,7 +317,7 @@ These two datasets are used:
 
 Figure~\ref{fig:osmac:mse} shows the MSEs \(\|\beta_{\mathcal{S}} - \beta\|_2^2\) for different subsample sizes \(r\).
 OSMAC consistently gives the closest approximation of \(\beta\), confirming its theoretical A-optimality.
-\begin{figure}
+\begin{figure}[t]
 	\begin{subfigure}{0.5\textwidth}
 		\begin{tikzpicture}
 			\begin{axis}[
@@ -385,7 +385,7 @@ OSMAC consistently gives the closest approximation of \(\beta\), confirming its 
 	\caption{MSEs on \(\beta\) for different subsample sizes \(r\).}\label{fig:osmac:mse}
 \end{figure}
 
-\subsection{WKM-SVM}%
+\subsection{Clustering for SVMs}%
 \label{sec:params:wkmsvm}
 
 To speed up the training of SVMs \citet{Almeida2000} proposed a simple method that reduces the dataset size via \(k\)-means clustering.

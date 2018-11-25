@@ -69,7 +69,7 @@ We will only give an intuition for this choice of kernel and refer to~\citet{Kle
 
 The Mahalanobis distance \(d_M\) is used instead of the Euclidean distance because the hyperparameters in a configuration typically use very different scales and are in some cases also correlated.
 Figure~\ref{fig:fabolas:mahalanobis} gives an intuition for this.
-\begin{figure}
+\begin{figure}[t]
 	\centering
 	\includegraphics[width=0.7\linewidth]{gfx/fabolas/mahalanobisDistance.pdf}
 	\caption{
@@ -84,7 +84,7 @@ The class of Matérn kernels interpolates between the Gaussian (\textsc{Sq-Exp})
 Because the exponential kernel drops off quickly, configurations quickly become uncorrelated which causes noisy samples.
 The Gaussian kernel drops off less quickly causing smoother samples.
 Fabolas uses \textsc{Matérn5} as it empirically fits the smoothness of typical loss functions \(l\) quite well.
-\begin{figure}
+\begin{figure}[t]
 	\centering
 	\includegraphics[width=0.75\linewidth]{gfx/fabolas/matern.pdf}
 	\caption{

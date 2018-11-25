@@ -1,6 +1,26 @@
 % !TEX root = ../main.tex
-
+% chktex-file 21
 \section{Conclusion}%
 \label{sec:conclusion}
 
-\textit{TODO}
+In this paper we presented two approaches to speed up hyperparameter optimization: Fabolas and learning curve extrapolation.
+Both use probabilistic models to estimate values of the error function.
+Then four approaches to speed up training were presented: Bag of Little Bootstraps, subsample size selection for gradient descent, subsampling for logistic regression and \(k\)-means clustering for SVMs.\
+Since the presented approaches optimize different aspects of the training process, various combinations of them are possible.
+We will now take a brief look at promising combinations:
+\begin{itemize}
+	\item Since Fabolas is a hyperparameter optimizer that does not make assumptions about the learner, it can be combined trivially with any of the training optimization approaches presented in Section~\ref{sec:params}.
+	\item The learning curve extrapolation method described in Section~\ref{sec:hyperparams:earlyterm} requires a learner using gradient descent.
+		It can thus be combined with the subsample size selection method described in Section~\ref{sec:params:samplesize}.
+	\item Learning curve extrapolation could additionally be combined with Fabolas to guide the hyperparameter search.
+		This would however require changing the covariance kernel of the cost model \(c\) since probes at suboptimal positions are likely to be terminated early, making them less costly and thus more attractive for the aquisition function \(a_F\).
+		One possible approach to adapt the cost model is to add a dependence on the loss model \(f\).
+		This would essentially merge the two Gaussian processes \(c\) and \(f\) into a single cost-loss model over the parameter space \(\Theta = \Lambda \times [0, 1] \times \{\mathrm{cost}, \mathrm{loss}\}\) where information about the loss of a configuration is indicative about its cost.
+		Finding a suitable kernel function for this joint GP model could be a subject of further research.
+	\item In principle Bag of Little Bootstraps (see~\ref{sec:params:blb}) could be combined with the other three training optimization methods since it is a general purpose bagging method.
+		However the combination of BLB with subsample size selection for gradient descent is problematic since the latter relies on dynamically adapting the sample size during training to reduce the expected variance.
+		This approach does not work well if the training data is a resampled BLB bootstrap that does not allow for significant variance reduction since it only contains a small fraction of datapoints.
+		The combinations of BLB with OSMAC and of BLB with WKM-SVM are more promising.
+		In the case of OSMAC the sampling weights \(\pi_i\) could be used to sample the small bootstrap samples \(\check{X}\).
+\end{itemize}
+Evaluating those combinations could be a subject of future work.
