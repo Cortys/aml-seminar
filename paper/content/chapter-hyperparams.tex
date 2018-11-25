@@ -25,7 +25,7 @@ There are multiple ways to reduce the total cost of those evaluations:
 \subsection{FABOLAS}%
 \label{sec:hyperparams:fabolas}
 
-The first approach we will discuss is called Fabolas (Fast Bayesian Optimization of Machine Learning Hyperparameters on Large Datasets)~\cite{Klein2016}.
+The first approach we will discuss is called Fabolas (Fast Bayesian Optimization of Machine Learning Hyperparameters on Large Datasets)~\cite{Klein2017}.
 It can be applied to any learner \(L\) and is based upon two main ideas:
 \begin{enumerate}
 	\item The validation loss \(l\) is modeled as a \textit{Gaussian process} (GP) \(f\) based on the assumption that two configurations \(\lambda\) and \(\lambda'\) will perform similar if they are similar according to some kernel \(k(\lambda, \lambda')\).
@@ -65,7 +65,7 @@ To model the covariances between different combinations of hyperparameters and t
 \end{align}
 Here \(k_{\textsc{Matérn5}}\) denotes the stationary Matérn kernel (\(\nu = \nicefrac{5}{2}\)) with \(d_M\) being the Mahalanobis distance between the two compared hyperparameter configurations.
 \(k_{\mathrm{lin}}\) essentially is a simple linear kernel modeling the assumption that \(l\) monotonically decreases when \(s\) is increased.
-We will only give an intuition for this choice of kernel and refer to~\citet{Klein2016} for the details.
+We will only give an intuition for this choice of kernel and refer to~\citet{Klein2017} for the details.
 
 The Mahalanobis distance \(d_M\) is used instead of the Euclidean distance because the hyperparameters in a configuration typically use very different scales and are in some cases also correlated.
 Figure~\ref{fig:fabolas:mahalanobis} gives an intuition for this.
@@ -89,9 +89,9 @@ Please refer to \citet{Schoen2017} for an explanation of why this is the case.
 	\centering
 	\includegraphics[width=0.75\linewidth]{gfx/fabolas/matern.pdf}
 	\caption{
-		Comparison between different covariance kernels.
-		The middle shows randomly sampled functions \(f\) using different kernels.
-		The right shows random samples after two \(f\) values were observed and incorporated into the model via GP regression.
+		(Left) Comparison between different covariance kernels.
+		(Middle) Randomly sampled functions \(f\) using those kernels.
+		(Right) Random samples after two \(f\) values were observed and incorporated into the model via GP regression.
 		\source{Shahriari2016}
 	}\label{fig:fabolas:matern}
 \end{figure}
@@ -149,7 +149,7 @@ Figure~\ref{fig:fabolas:eval} compares Fabolas to the following other hyperparam
 	\end{subfigure}
 	\caption{
 		SVM optimization on the MNIST dataset.\
-		\sourceinline{Klein2016}
+		\sourceinline{Klein2017}
 		(Left) Comparison of the test performance over time of different optimzers.
 		(Middle) Comparison of Fabolas with different MTBO subsample sizes.
 		(Right) Comparison of the subsample sizes \(s\) that MTBO and Fabolas choose for their probes.
