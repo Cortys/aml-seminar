@@ -120,7 +120,7 @@ The resulting loss value and runtime are then used to update the loss model \(f\
 
 \subsubsection{Evaluation}%
 \label{sec:hyperparams:fabolas:eval}
-Fabolas was evaluated in \textit{support vector machine} (SVM) and \textit{convolutional neural network} (CNN) optimization tasks on the MNIST and CIFAR-10 dataset respectively.
+Fabolas was evaluated in \textit{support vector machine} (SVM) and \textit{convolutional neural network} (CNN) optimization tasks on the MNIST and CIFAR-10 dataset respectively\footnote{A reference implementation can be found at \url{https://github.com/automl/RoBO}}.
 Figure~\ref{fig:fabolas:eval} compares Fabolas to the following other hyperparameter optimization approaches:
 \begin{itemize}
 	\item \textbf{Random Search:}
@@ -132,7 +132,7 @@ Figure~\ref{fig:fabolas:eval} compares Fabolas to the following other hyperparam
 		Entropy Search uses an aquisition function similar to the one used by Fabolas but without the cost model.
 	\item \textbf{MTBO-\(N\) (Multi-Task Bayesian Optimization~\cite{Swersky2013}):}
 		Like Fabolas but restricts probes to two sizes \(s \in \{\nicefrac{1}{N}, 1\}\), i.~e.\@ either a small subsample or the entire dataset is used.
-		Multiple values for \(N\) were evaluated: 4, 32 and 512.
+		Multiple values for \(N\) are evaluated: 4, 32 and 512.
 \end{itemize}
 \begin{figure}
 	\begin{subfigure}[b]{0.32\textwidth}
@@ -159,7 +159,7 @@ Figure~\ref{fig:fabolas:eval} compares Fabolas to the following other hyperparam
 All Bayesian optimization approaches are at least one order of magnitude faster than random search.
 By allowing two probing sizes, MTBO is one additional order of magnitude faster.
 Depending on the choice of \(N\) MTBO sometimes improves faster than Fabolas initially.
-Once Fabolas starts improving it does however find a good configuration about one order of magnitude faster than MTBO.\
+Once Fabolas starts improving, it does however find a good configuration about one order of magnitude faster than MTBO.\
 The optimal configuration is found at roughly the same time by both Fabolas and MTBO.\
 Overall Fabolas finds a good configuration between 100 and 1000 times faster than random search does.
 Similar results are obtained when optimizing CNNs on CIFAR-10.
@@ -168,11 +168,13 @@ Similar results are obtained when optimizing CNNs on CIFAR-10.
 \label{sec:hyperparams:earlyterm}
 
 The second approach for speeding up hyperparameter optimization focuses on reducing the number of training iterations \(E\).
-It can in principle be applied to any iterative learner and can be integrated into any hyperparameter optimizer.
+It can in principle be applied to any gradient descent based learner and can be integrated into any hyperparameter optimizer.
 The idea is to monitor the learning curve of a learner during training with a hyperparameter configuration \(\lambda\).
 If it is unlikely that a good accuracy will be reached with \(\lambda\), training will be terminated before convergence.
 
 The method was first described by \citet{Domhan2015} in the context of hyperparameter optimization for \textit{deep neural networks} (DNNs) that are trained using \textit{stochastic gradient descent} (SGD).
+Since no strong assumptions specific to DNNs are made, it can however also be used for other learners.
+DNNs were used because their gradient descent steps are comparatively expensive.
 
 \subsubsection{Extrapolation Method}%
 \label{sec:hyperparams:earlyterm:method}
@@ -220,7 +222,7 @@ To estimate the probability \(P(y_E < \hat{y}\, |\, y_{1:n})\) MCMC is used to s
 	P(y_{1:n}\, |\, \xi) =&\ \prod_{t = 1}^{n} \mathcal{N}(y_t; f_{\mathit{comb}}(t\, |\, \xi), \sigma^2) \\
 	P(\xi) \propto&\ \mathbbm{1}[f_{\mathit{comb}}(1\, |\, \xi) < f_{\mathit{comb}}(E\, |\, \xi) \land \forall k: w_k > 0]
 \end{align}
-The prior on \(\xi\) is used to model the fact that learning curves do not typically decrease over time.
+The prior \(P(\xi)\) is used to model the fact that learning curves do not typically decrease over time.
 Given the learning curve samples, we can now estimate
 \begin{align}
 	P(y_E < \hat{y}\, |\, y_{1:n}) =&\ \int P(\xi\, |\, y_{1:n}) P(y_E < \hat{y}\, |\, \xi)\, \mathrm{d}\xi \\
@@ -230,12 +232,7 @@ Given the learning curve samples, we can now estimate
 \subsubsection{Evaluation}%
 \label{sec:hyperparams:earlyterm:eval}
 
-The early termination method we just described was evaluated on the CIFAR-10, CIFAR-100 and MNIST dataset.
-Figure~\ref{fig:earlyterm:eval} shows the behavior of early termination and the obtained speedup on CIFAR-10.
-As expected, configurations with learning curves that tend to approach low accuracies are terminated early.
-Configurations with high accuracies are evaluated until convergence.
-This approach consistently speeds up the hyperparameter optimization by a factor of two across the tested datasets while reaching the same quality.
-\begin{figure}
+\begin{figure}[t]
 	\begin{subfigure}{0.4\textwidth}
 		\centering
 		\includegraphics[width=0.9\linewidth]{gfx/earlyterm/samples.png}
@@ -245,9 +242,14 @@ This approach consistently speeds up the hyperparameter optimization by a factor
 		\includegraphics[width=0.8\linewidth]{gfx/earlyterm/time.png}
 	\end{subfigure}
 	\caption{
-		Evaluation on the CIFAR-10 dataset.
+		Evaluation of early termination on the CIFAR-10 dataset.
 		The left graph shows the learning curves of all hyperparameter configurations that were evaluated.
 		The right graph shows the average validation error over time.
 		\source{Domhan2015}
 	}\label{fig:earlyterm:eval}
 \end{figure}
+The early termination method we just described was evaluated on the CIFAR-10, CIFAR-100 and MNIST dataset.
+Figure~\ref{fig:earlyterm:eval} shows the behavior of early termination and the obtained speedup on CIFAR-10.
+As expected, configurations with learning curves that tend to approach low accuracies are terminated early.
+Configurations with high accuracies are evaluated until convergence.
+This approach consistently speeds up the hyperparameter optimization by a factor of two across the tested datasets while reaching the same quality.

@@ -27,7 +27,7 @@ The regular \(n\) out of \(n\) bootstrapping technique for variance reduction is
 However the \textit{\(b\) out of \(n\) bootstrapping} (BOFN) approach can in principle be applied.
 It uses \(s\) samples \(\{\check{X}^{(i)} = (\check{X}_1^{(i)}, \dots, \check{X}_b^{(i)})\, |\, 1 \leq i \leq s\}\) of \(b\) datapoints each.
 Since this approach independently learns \(s\) hypotheses \(h_i\) on small datasets \(\check{X}^{(i)}\), their parameterizations \(\theta_i\) tend to have large confidence intervals.
-Because of that, the quality of the combined hypothesis is strongly dependent on \(b\).
+Because of that, the quality of the combined hypothesis is strongly dependent on \(b\)~\cite{Bickel1997}.
 BLB reduces this dependence.
 
 \subsubsection{Intuition}%
@@ -54,16 +54,11 @@ Since most commonly used classifiers support weighted samples, BLB is widely app
 \subsubsection{Evaluation}%
 \label{sec:params:blb:eval}
 
-To show the advantages of BLB for classification it was evaluated with logistic regression.
+To show the advantages of BLB for classification it was evaluated with logistic regression on a randomly generated dataset.
 Figure~\ref{fig:blb:eval:single} shows that BLB converges on a solution much faster than the regular \(n\) out of \(n\) bootstrapping (BOOT) with comparable results.
 It also shows that BLB is less sensitive to the choice of \(b\) than BOFN.\
 BLB reached good results with \(b \geq n^{0.6}\) whereas BOFN required at least \(b \geq n^{0.7}\).
-
-While BLB already outperforms BOOT without parallelism, as training is overproportionally faster on small samples, its scalability becomes more apparent when parallelized.
-Figure~\ref{fig:blb:eval:parallel} shows that BLB significantly outperforms BOOT on a Spark cluster with 10 workers.
-This is due to the fact that each BLB sample can be held in memory by its corresponding worker node.
-The much larger BOOT samples, on the other hand, require disk reads for large datasets.
-\begin{figure}
+\begin{figure}[t]
 	\begin{subfigure}[t]{0.66\textwidth}
 		\centering
 		\includegraphics[width=0.49\linewidth]{gfx/blb/time1.pdf}
@@ -91,6 +86,12 @@ The much larger BOOT samples, on the other hand, require disk reads for large da
 	}\label{fig:blb:eval}
 \end{figure}
 
+While BLB already outperforms BOOT without parallelism, as training is overproportionally faster on small samples, its scalability becomes more apparent when parallelized.
+Figure~\ref{fig:blb:eval:parallel} shows that BLB significantly outperforms BOOT on a Spark cluster with 10 workers.
+This is due to the fact that each BLB sample can be held in memory by its corresponding worker node.
+The much larger BOOT samples, on the other hand, require disk reads for large datasets which causes the big difference in runtime.
+However even if the BOOT samples are cached in memory, BLB still performs better since training on the compact BLB samples is overproportionally faster than training on regular bootstrap samples.
+
 \subsection{Subsample Size Selection for Gradient Descent}%
 \label{sec:params:samplesize}
 
@@ -113,9 +114,9 @@ Let \(\mathcal{S} \subseteq \{1, \dots, N\}\) describe a random subsample of \(\
 SGD will take a step in the descent direction \(d = -\nabla J_{\mathcal{S}}(w)\) where \(J_{\mathcal{S}}(w) := \frac{1}{|\mathcal{S}|} \sum_{i \in \mathcal{S}} \ell(h_{w}(x_i), y_i)\) is the differentiable average loss on \(\mathcal{S}\) given the current configuration \(w\).
 Let \(J(w)\) be the average loss on the entire dataset \(\Dtrain\).
 \(J(w)\) is the objective function we want to minimize.
-Our goal is to trade off \(|\mathcal{S}|\) s.~t.\@ it is as small as possible and \(\nabla J_{\mathcal{S}}(w)\) still \textit{tends to agree} with the objective gradient \(\nabla J(w)\), or more formally
+Our goal is to trade off \(|\mathcal{S}|\) s.~t.\@ it is as small as possible while \(\nabla J_{\mathcal{S}}(w)\) still \textit{tends to agree} with the objective gradient \(\nabla J(w)\), or more formally
 \begin{align}
-	\|\nabla J_{\mathcal{S}}(w) - \nabla J(w) \|_2 \leq \theta \|\nabla J_{\mathcal{S}}(w)\|_2, \theta \in [0, 1)\label{eq:samplesize:cond} % chktex 9
+	\min |\mathcal{S}|\ \text{s.~t.}\ \|\nabla J_{\mathcal{S}}(w) - \nabla J(w) \|_2 \leq \theta \|\nabla J_{\mathcal{S}}(w)\|_2, \theta \in [0, 1)\label{eq:samplesize:cond} % chktex 9
 \end{align}
 A value of \(\theta = 0\) means that \(\nabla J_{\mathcal{S}}(w)\) always has to be equal to \(\nabla J(w)\),
 whereas \(\theta = 1\) would allow steps that directy oppose \(\nabla J(w)\).
@@ -131,16 +132,16 @@ Given a sample \(\mathcal{S}\), the variance of all samples of that size can ins
 \end{align}
 This approximation assumes that \(|\mathcal{S}| \ll N\).
 Using (\ref{eq:samplesize:approx}) we can now estimate (\ref{eq:samplesize:exp}) which in turn estimates (\ref{eq:samplesize:cond}).
-If we estimate that (\ref{eq:samplesize:exp}) is not satisfied, i.~e.\@ that the sample gradient is likely to deviate significantly from the objective gradient, a larger sample \(\widehat{\mathcal{S}}\) has to be used.
+If we estimate that (\ref{eq:samplesize:exp}) is not satisfied for a given \(\mathcal{S}\), i.~e.\@ that the sample gradient is likely to deviate significantly from the objective gradient, a larger sample \(\widehat{\mathcal{S}}\) has to be used.
 In principle we could simply increase the sample size by a constant amount repeatedly and recheck (\ref{eq:samplesize:exp}) but this is slow if \(|\mathcal{S}|\) is far off from satisfying the condition.
-Instead we will adaptively choose \(|\widehat{\mathcal{S}}|\) s.~t.\@ it is expected to satisfy (\ref{eq:samplesize:exp}):
+Instead we will adaptively choose \(|\widehat{\mathcal{S}}|\) s.~t.\@ it is expected to satisfy (\ref{eq:samplesize:exp}) directly:
 \begin{align}
 	|\widehat{\mathcal{S}}| = \frac{|\mathcal{S}|\, \|\mathrm{Var}_{\mathcal{S}}(\nabla J_{\mathcal{S}}(w))\|_1}{\theta^2 \|\nabla J_{\mathcal{S}(w)}\|_2^2}\label{eq:samplesize:inc}
 \end{align}
 Please refer to \citet[chapter~3]{Byrd2012} for a more detailed explanation of (\ref{eq:samplesize:approx}) and (\ref{eq:samplesize:inc}).
-To incorporate the ideas described above into SGD (\ref{eq:samplesize:exp}) has to be checked after each gradient descent step.
+To incorporate the ideas described above into the regular SGD algorithm, (\ref{eq:samplesize:exp}) has to be checked after each gradient descent step.
 If the check fails, the size of the following samples has to be increased according to (\ref{eq:samplesize:inc}).
-Good values for the initial sample size and for \(\theta\) have to be found via hyperparameter optimization.
+Good values for the initial sample size \(|\mathcal{S}_0|\) and for \(\theta\) have to be found via hyperparameter optimization.
 
 The idea outlined above can similarly also be applied to other gradient based optimization methods like the curvature-aware \textit{Newton Conjugate Gradient} (NCG) method.
 It not only uses \(\nabla J_{\mathcal{S}}(w)\) but also information from the Hessian \(\nabla^2 J_{\mathcal{S}}(w)\) to compute the direction \(d\) of the next step.
@@ -151,7 +152,7 @@ We refer to \citet[chapter~5]{Byrd2012} for the details.
 
 Subsample size selection was evaluated on a multi-class logistic regression problem using NCG for optimization.
 At first we look at the accuracy of the estimation of (\ref{eq:samplesize:cond}) via (\ref{eq:samplesize:approx}) and (\ref{eq:samplesize:exp}).
-On average \(\|\mathrm{Var}_{\mathcal{S}}(\nabla J_{\mathcal{S}}(w))\|_1\) deviates about 4\% from \(\|\nabla J_{\mathcal{S}}(w) - \nabla J(w) \|_2\) on the evaluation dataset if \(|\mathcal{S}| \ll N\).
+On average \(\|\mathrm{Var}_{\mathcal{S}}(\nabla J_{\mathcal{S}}(w))\|_1\) deviates about 4\% from \(\|\nabla J_{\mathcal{S}}(w) - \nabla J(w) \|_2\) on the evaluation dataset if \(|\mathcal{S}| \ll N\)~\cite[tbl.~5.1]{Byrd2012}.
 
 Figure~\ref{fig:samplesize:eval} shows that this accuracy is sufficient.
 Dynamic subsample size selection reaches the same quality as the batch method (fixed \(|\mathcal{S}| = N\)) while using significantly fewer datapoints.
@@ -232,6 +233,7 @@ If \(\theta\) is too big (see \(\theta = 0.75\)), \(\nabla J_{\mathcal{S}}(w)\) 
 \subsection{Subsampling for Logistic Regression}%
 \label{sec:params:osmac}
 
+We will now look at a method that optimizes the subsample selection process for logistic regression.
 Subsampling usually increases the \textit{mean squared error} (MSE) of the resulting hypothesis compared to one that is trained on the full dataset \(\Dtrain\).
 Let \(\mathcal{S} := \{{(x^*_i, y^*_i)\}}_{i=1}^{r}\) be a random subsample of \(\Dtrain\) that is drawn with or without replacement according to the probabilities \({\{\pi_i\}}_{i=1}^{N}\) where \(N = |\Dtrain|\) and \(\sum_{i=1}^{N} \pi_i = 1\).
 Usually \(\mathcal{S}\) is drawn from a uniform distribution, i.~e.\@ each datapoint \(x_i\) is drawn with probability \(\pi_i = N^{-1}\).
@@ -242,9 +244,9 @@ The core idea now is to choose the probabilities \(\pi_i\) s.~t.\@ more informat
 \subsubsection{Case Control}%
 \label{sec:params:osmac:cc}
 
-A simple idea to adjust the probabilities is to use \textit{Case-Control subsampling} (CC) in which a roughly equal amount of positive and negative samples is drawn.
+A simple idea to adjust the sampling probabilities \(\pi_i\) is to use \textit{Case-Control subsampling} (CC) in which a roughly equal amount of positive and negative samples is drawn.
 Let \(\Dtrain^+ := \{(x, y) \in \Dtrain\, |\, y = 1\}\) and \(\Dtrain^- := \{(x, y) \in \Dtrain\, |\, y = 0\}\).
-CC samples would be chosen without replacement with probabilities
+CC samples would be then chosen without replacement with probabilities
 \begin{align}
 	\pi_i = \begin{cases}
 		|\Dtrain^+|^{-1} & \mathrm{if}\ y_i = 1 \\
@@ -263,13 +265,14 @@ This approach however is problematic because it introduces a bias towards unambi
 
 \citet{Fithian2013} proposed \textit{Local Case-Control subsampling} (LCC) to remove the bias from CC.\
 LCC determines the sampling probabilities \(\pi_i\) via a pilot estimate \(\beta_0\).
-The estimate \(\beta_0\) is the MLE of a small pilot sample \(\mathcal{S}_0\) that is drawn with uniform sample probabilities.
-Datapoints are now weighted by the error of the pilot estimator on them:
+The estimate \(\beta_0\) is the MLE of a small pilot sample \(\mathcal{S}_0\) that is drawn with uniform or CC sample probabilities.
+CC sampling should only be used for the pilot if \(\Dtrain\) contains an imbalanced amount of positive and negative samples.
+After determining the pilot estimate \(\beta_0\), datapoints are weighted by the error of the pilot estimator on them:
 \begin{align}
 	\pi_i = \frac{|y_i - p(x_i\, |\, \beta_0)|}{\sum_{j=1}^{N} |y_j - p(x_j\, |\, \beta_0)|}\
 	\mathrm{with}\ p(x\, |\, \beta) = \frac{1}{1 + \exp(\beta^T x)}
 \end{align}
-Then a sample \(\mathcal{S}_{\mathrm{LCC}}\) is drawn using those probabilities, typically with replacement since this is computationally less expensive.
+Then a bigger sample \(\mathcal{S}_{\mathrm{LCC}}\) is drawn using those probabilities, typically with replacement since this is computationally less expensive.
 This produces an estimate \(\beta_{\mathcal{S}_{\mathrm{LCC}}}\) that is consistent with \(\beta_{\Dtrain}\), i.~e.\@ \(\|\beta_{\mathcal{S}_{\mathrm{LCC}}} - \beta_{\Dtrain}\|_2 \to 0\) as \(r \to \infty\).
 Additionally LCC prioritizes datapoints that are close to the decision boundary estimated by the pilot.
 This tends to reduce the variance of the estimate \(\beta_{\mathcal{S}_{\mathrm{LCC}}}\), especially if \(\Dtrain\) contains an imbalanced amount of positive and negative samples.
@@ -304,7 +307,7 @@ Since the sigmoidal \(p\) function saturates quickly this fact is often not capt
 \subsubsection{Evaluation}%
 \label{sec:params:osmac:eval}
 
-We will now compare uniform, LCC and OSMAC sampling on the two datasets.
+We will now compare uniform, LCC and OSMAC sampling on two datasets.
 The datapoints \(x_i\) are randomly sampled from different distributions.
 The corresponding classes \(y_i \in \{0, 1\}\) are then assigned using a fixed coefficient vector \(\beta\).
 These two datasets are used:
@@ -319,6 +322,7 @@ These two datasets are used:
 
 Figure~\ref{fig:osmac:mse} shows the MSEs \(\|\beta_{\mathcal{S}} - \beta\|_2^2\) for different subsample sizes \(r\).
 OSMAC consistently gives the closest approximation of \(\beta\), confirming its theoretical A-optimality.
+The reduced coefficient approximation error in turn results in a reduced error of \mbox{OSMAC} on \(\Dtrain\).
 \begin{figure}[t]
 	\begin{subfigure}{0.5\textwidth}
 		\begin{tikzpicture}
@@ -419,7 +423,11 @@ Figure~\ref{fig:wkmsvm:compare:km} shows that this can cause KM-SVM to deviate s
 		\includegraphics[width=0.85\linewidth]{gfx/wkmsvm/wkm.png}
 		\caption{WKM-SVM}\label{fig:wkmsvm:compare:wkm}
 	\end{subfigure}
-	\caption{Comparison of the decision boundaries of KM-SVM and WKM-SVM.\\ \source{Bang2014}}\label{fig:wkmsvm:compare}
+	\caption{
+		Comparison of the decision boundaries of KM-SVM and WKM-SVM.\
+		The numbers next to the cluster centers on the right represent the cluster weights.
+		\source{Bang2014}
+	}\label{fig:wkmsvm:compare}
 \end{figure}
 
 WKM-SVM~\cite{Bang2014} improves upon KM-SVM by weighting each cluster center \(c_i\) by the amount of datapoints \(|C_i|\) it represents.
@@ -433,17 +441,17 @@ We will now compare KM-SVM and WKM-SVM using different compression rates \(R \in
 A compression rate of \(R = 1\) corresponds to a SVM that is trained on the entire dataset.
 For \(\Dtrain\) the \texttt{PimaIndiansDiabetes2} dataset is used.
 Figure~\ref{fig:wkmsvm:eval} shows that WKM-SVM consistently performs better than KM-SVM with a roughly identical training time.
-
-\begin{figure}
+Both clustering methods improve the runtime significantly without any significant increases in the test error.
+\begin{figure}[t]
 	\begin{subfigure}{0.33\textwidth}
 		\begin{tikzpicture}
 			\begin{axis}[
 				width=\linewidth,
 				height=0.8\linewidth,
 				xmin=1, xmax=10,
-				ymin=0.2, ymax=0.3,
+				ymin=0, ymax=0.3,
 				xtick={1,3,5,10},
-				ytick distance=0.02,
+				ytick distance=0.05,
 				xlabel={\(R\)},
 				ylabel={Test error},
 				axis x line=bottom,
@@ -452,8 +460,8 @@ Figure~\ref{fig:wkmsvm:eval} shows that WKM-SVM consistently performs better tha
 				tick label style={font=\tiny},
 				y tick label style={/pgf/number format/.cd, fixed},
 				legend style={
-					at={(0.05,0.95)},
-					anchor=north west,
+					at={(0.95,0.05)},
+					anchor=south east,
 					nodes={scale=0.6, transform shape}
 				},
 				legend cell align={left}

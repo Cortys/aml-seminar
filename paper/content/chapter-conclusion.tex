@@ -8,7 +8,7 @@ Both use probabilistic models to estimate values of the error function.
 Then four approaches to speed up training were presented: Bag of Little Bootstraps, subsample size selection for gradient descent, subsampling for logistic regression and \(k\)-means clustering for SVMs.\
 All presented approaches are able to speedup training significantly on big datasets.
 Since those approaches optimize different aspects of the training process, various combinations of them are possible to get further speedups.
-We will now take a brief look at promising combinations:
+We will now take a brief look at promising combinations.
 \begin{itemize}
 	\item Since Fabolas is a hyperparameter optimizer that does not make assumptions about the learner, it can be combined trivially with any of the training optimization approaches presented in Section~\ref{sec:params}.
 	\item The learning curve extrapolation method described in Section~\ref{sec:hyperparams:earlyterm} requires a learner using gradient descent.
@@ -18,10 +18,12 @@ We will now take a brief look at promising combinations:
 		One possible approach to adapt the cost model is to add a dependence on the loss model \(f\).
 		This would essentially merge the two Gaussian processes \(c\) and \(f\) into a single cost-loss model over the parameter space \(\Theta = \Lambda \times [0, 1] \times \{\mathrm{cost}, \mathrm{loss}\}\) where information about the loss of a configuration is indicative about its cost.
 		Finding a suitable kernel function for this joint GP model could be a subject of further research.
-	\item In principle Bag of Little Bootstraps (see~\ref{sec:params:blb}) could be combined with the other three training optimization methods since it is a general purpose bagging method.
+	\item In principle Bag of Little Bootstraps (Section~\ref{sec:params:blb}) could be combined with the other three training optimization methods since it is a general purpose bagging method.
 		However the combination of BLB with subsample size selection for gradient descent is problematic since the latter relies on dynamically adapting the sample size during training to reduce the expected variance.
 		This approach does not work well if the training data is a resampled BLB bootstrap that does not allow for significant variance reduction since it only contains a small fraction of datapoints.
 		The combinations of BLB with OSMAC and of BLB with WKM-SVM are more promising.
 		In the case of OSMAC the sampling weights \(\pi_i\) could be used to sample the small bootstraps \(\check{X}\) (compare~\citet{Norazan2009}).
+	\item Another promising combination is that of subsample size optimization (Section~\ref{sec:params:samplesize}) with OSMAC (Section~\ref{sec:params:osmac}).
+		Since logistic regression is often implemented using gradient descent, both methods can be combined by simply using OSMAC to get the subsample for each SGD step.
 \end{itemize}
 Evaluating those combinations could be a subject of future work.
