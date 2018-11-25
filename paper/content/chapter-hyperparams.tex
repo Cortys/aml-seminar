@@ -5,7 +5,7 @@
 
 As described in the introduction, the goal of hyperparameter optimization is to find a global minimum of \(l\).
 Since \(l\) is generally unknown, analytical methods or gradient descent cannot usually be applied.
-The only way the get information about \(l\) is to evaluate it, which is costly.
+The only way the get information about \(l\) is to evaluate it on individual configurations \(\lambda\) which is costly.
 There are multiple ways to reduce the total cost of those evaluations:
 \begin{enumerate}
 	\item \textbf{Number \(T\) of evaluations of \(l\):}
@@ -13,7 +13,7 @@ There are multiple ways to reduce the total cost of those evaluations:
 		\(T\) is usually fixed when using a grid search or a random search.
 		After evaluating \(T\) configurations, the best one is chosen.
 		Those na{\"\i}ve approaches assume that \(l(\lambda)\) is independent of \(l(\lambda')\) for all pairs \(\lambda \neq \lambda'\).
-		We will see that this strong assumption of independence is not necessarily true which in turn allows reducing \(T\).
+		We will see that this strong assumption of independence is not necessarily true which in turn allows us to reduce \(T\).
 	\item \textbf{Training dataset size \(S\):}
 		The performance of a given configuration \(l(\lambda)\) is computed by training the learner on \(\Dtrain\) which is expensive for big datasets.
 		By training on \(S\) instead of \(|\Dtrain|\) datapoints the evaluation can be sped up.
@@ -54,9 +54,19 @@ This collapses the space of possible functions \(f\) to those functions that ali
 	\bm{m} :=&\ {(\mu_0(\bm{\theta}_1), \dots, \mu_0(\bm{\theta}_n))}^T \nonumber \\
 	\bm{k}(\theta) :=&\ {(k(\bm{\theta}_1, \theta), \dots, k(\bm{\theta}_n, \theta))}^T \nonumber \\
 	\bm{K} \in&\ \mathbb{R}^{n \times n}, \bm{K}_{ij} := k(\bm{\theta}_i, \bm{\theta}_j) \nonumber \\
-	\mathbb{E}[f(\theta)\, |\, \mathcal{D}_n] :=&\ \mu_n(\theta) = m_0(\theta) + \bm{k}{(\theta)}^T \bm{K}^{-1} (\bm{y} - \bm{m}) \\
+	\mathbb{E}[f(\theta)\, |\, \mathcal{D}_n] :=&\ \mu_n(\theta) = \mu_0(\theta) + \bm{k}{(\theta)}^T \bm{K}^{-1} (\bm{y} - \bm{m}) \\
 	\mathrm{Cov}(f(\theta), f(\theta')\, |\, \mathcal{D}_n) :=&\ k(\theta, \theta') - \bm{k}{(\theta)}^T \bm{K}^{-1} \bm{k}(\theta')
 \end{align}
+\begin{figure}
+	\centering
+	\includegraphics[width=0.8\linewidth]{gfx/fabolas/matern.pdf}
+	\caption{
+		(Left) Comparison between different covariance kernels.
+		(Middle) Randomly sampled functions \(f\) using those kernels.
+		(Right) Random samples after two \(f\) values were observed and incorporated into the model via GP regression.
+		\source{Shahriari2016}
+	}\label{fig:fabolas:matern}
+\end{figure}
 
 Fabolas works by modeling the loss function \(l\) as a Gaussian process \(f \sim \mathcal{GP}(m, k)\) with parameter set \(\Theta := \Lambda \times [0, 1]\) where \(\mu_0(\lambda, s) = \mathbb{E}[f(\lambda, s)] = \mathbb{E}[l(\lambda)\, |\, \text{training size}\ s]\).
 To model the covariances between different combinations of hyperparameters and training set sizes, the following product kernel is used:
@@ -65,7 +75,7 @@ To model the covariances between different combinations of hyperparameters and t
 \end{align}
 Here \(k_{\textsc{Matérn5}}\) denotes the stationary Matérn kernel (\(\nu = \nicefrac{5}{2}\)) with \(d_M\) being the Mahalanobis distance between the two compared hyperparameter configurations.
 \(k_{\mathrm{lin}}\) essentially is a simple linear kernel modeling the assumption that \(l\) monotonically decreases when \(s\) is increased.
-We will only give an intuition for this choice of kernel and refer to~\citet{Klein2017} for the details.
+We will now give an intuition for this choice of kernel and refer to~\citet{Klein2017} for the details.
 
 The Mahalanobis distance \(d_M\) is used instead of the Euclidean distance because the hyperparameters in a configuration typically use very different scales and are in some cases also correlated.
 Figure~\ref{fig:fabolas:mahalanobis} gives an intuition for this.
@@ -85,16 +95,6 @@ Because the exponential kernel drops off quickly, configurations quickly become 
 The Gaussian kernel drops off less quickly causing smoother samples.
 Fabolas uses \textsc{Matérn5} as it empirically fits the smoothness of typical loss functions \(l\) quite well.
 Please refer to \citet{Schoen2017} for an explanation of why this is the case.
-\begin{figure}[t]
-	\centering
-	\includegraphics[width=0.75\linewidth]{gfx/fabolas/matern.pdf}
-	\caption{
-		(Left) Comparison between different covariance kernels.
-		(Middle) Randomly sampled functions \(f\) using those kernels.
-		(Right) Random samples after two \(f\) values were observed and incorporated into the model via GP regression.
-		\source{Shahriari2016}
-	}\label{fig:fabolas:matern}
-\end{figure}
 
 \subsubsection{Bayesian optimization}%
 \label{sec:hyperparams:fabolas:bayesian}
@@ -106,10 +106,10 @@ To reduce the number of probes required until this minimum converges, an \textit
 Its role is to trade-off exploration vs.\@ exploitation of \(l\) by describing the expected utility of probing \((\lambda_{n+1}, s_{n+1})\) given a set of previous probes \(\mathcal{D}_n\).
 Fabolas uses an aquisition function that rates configurations by their \textit{information gain} per computation time:
 \begin{align}
-	a_F(\lambda, s) :=&\ \frac{1}{c(\lambda, s)} \mathbb{E}_y\left[ p(y\, |\, \lambda, s, \mathcal{D}_n)\ \cdot \mathrm{KL}_{\hat{\lambda}}(p_{\min}(\hat{\lambda}\, |\, \mathcal{D}_n \cup \{(\lambda, s, y)\})\, ||\, u(\hat{\lambda}))\right] \\
+	a_F(\lambda, s) :=&\ \frac{1}{c(\lambda, s)} \mathbb{E}_y\left[ p(y\, |\, \lambda, s, \mathcal{D}_n)\ \cdot \mathrm{KL}_{\hat{\lambda}}(p_{\min}(\hat{\lambda}\, |\, \mathcal{D}_n \cup \{(\lambda, s, y)\})\, \|\, u(\hat{\lambda}))\right] \\
 	p_{\min}(\lambda\, |\, \mathcal{D}) :=&\ p(\lambda \in \arg\min_{\lambda'}{f(\lambda', s = 1)}\, |\, \mathcal{D}) \nonumber
 \end{align}
-It measures the expected amount of available information about the optimal configuration if a given configuration were probed, i.~e.\@ the Kullback-Leibler divergence between the density \(p_\min\) of \(\lambda\) being optimal after a probe and the uniform density \(u\).
+It measures the expected amount of available information about the optimal configuration if a given configuration were probed, i.~e.\@ the Kullback-Leibler divergence between the density \(p_{\min}(\lambda)\) of \(\lambda\) being optimal after a probe and the uniform density \(u(\lambda)\).
 This information gain of a probe is compared to its expected associated computation time \(c\).
 \(c\) is estimated using a separate Gaussian process that is maintained alongside \(f\).
 Fabolas considers the cost of a probe because it tries to minimize the total optimization time not the total number of probes.
@@ -135,15 +135,15 @@ Figure~\ref{fig:fabolas:eval} compares Fabolas to the following other hyperparam
 		Multiple values for \(N\) were evaluated: 4, 32 and 512.
 \end{itemize}
 \begin{figure}
-	\begin{subfigure}{0.32\textwidth}
+	\begin{subfigure}[b]{0.32\textwidth}
 		\centering
 		\includegraphics[width=\linewidth]{gfx/fabolas/time1.png}
 	\end{subfigure}
-	\begin{subfigure}{0.32\textwidth}
+	\begin{subfigure}[b]{0.32\textwidth}
 		\centering
 		\includegraphics[width=\linewidth]{gfx/fabolas/time2.png}
 	\end{subfigure}
-	\begin{subfigure}{0.34\textwidth}
+	\begin{subfigure}[b]{0.34\textwidth}
 		\centering
 		\includegraphics[width=\linewidth]{gfx/fabolas/size.png}
 	\end{subfigure}
