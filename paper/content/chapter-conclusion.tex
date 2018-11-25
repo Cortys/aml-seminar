@@ -6,7 +6,8 @@
 In this paper we presented two approaches to speed up hyperparameter optimization: Fabolas and learning curve extrapolation.
 Both use probabilistic models to estimate values of the error function.
 Then four approaches to speed up training were presented: Bag of Little Bootstraps, subsample size selection for gradient descent, subsampling for logistic regression and \(k\)-means clustering for SVMs.\
-Since the presented approaches optimize different aspects of the training process, various combinations of them are possible.
+All presented approaches are able to speedup training significantly on big datasets.
+Since those approaches optimize different aspects of the training process, various combinations of them are possible to get further speedups.
 We will now take a brief look at promising combinations:
 \begin{itemize}
 	\item Since Fabolas is a hyperparameter optimizer that does not make assumptions about the learner, it can be combined trivially with any of the training optimization approaches presented in Section~\ref{sec:params}.
@@ -21,6 +22,6 @@ We will now take a brief look at promising combinations:
 		However the combination of BLB with subsample size selection for gradient descent is problematic since the latter relies on dynamically adapting the sample size during training to reduce the expected variance.
 		This approach does not work well if the training data is a resampled BLB bootstrap that does not allow for significant variance reduction since it only contains a small fraction of datapoints.
 		The combinations of BLB with OSMAC and of BLB with WKM-SVM are more promising.
-		In the case of OSMAC the sampling weights \(\pi_i\) could be used to sample the small bootstrap samples \(\check{X}\).
+		In the case of OSMAC the sampling weights \(\pi_i\) could be used to sample the small bootstraps \(\check{X}\) (compare~\citet{Norazan2009}).
 \end{itemize}
 Evaluating those combinations could be a subject of future work.

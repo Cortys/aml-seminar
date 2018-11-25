@@ -132,6 +132,12 @@
 ]{biblatex}
 \bibliography{bib-refs}
 
+\DeclareCiteCommand{\citenum}
+  {}
+  {\bibhyperref{\printfield{labelnumber}}}
+  {}
+  {}
+
 \makeatletter
 \newcounter{rulecount}[section]
 \newcommand{\ruleno}[1]{\ensuremath{r_{#1}}}

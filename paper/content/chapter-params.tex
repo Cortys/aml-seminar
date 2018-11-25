@@ -87,6 +87,7 @@ The much larger BOOT samples, on the other hand, require disk reads for large da
 	\caption{
 		Comparison of BLB and BOFN with BOOT using logistic regression.
 		Shows the error on the moving average of all sample hypotheses that are computed within a given time.
+		\source{Kleiner2011}
 	}\label{fig:blb:eval}
 \end{figure}
 
@@ -224,6 +225,7 @@ If \(\theta\) is too big (see \(\theta = 0.75\)), \(\nabla J_{\mathcal{S}}(w)\) 
 		Results on a multi-class logistic regression task using NCG.\
 		(Left) Comparison of dynamic subsample size selection with fixed sample sizes.
 		(Right) Comparison of different values for \(\theta\).
+		\source[data source]{Byrd2012}
 	}\label{fig:samplesize:eval}
 \end{figure}
 
@@ -253,7 +255,7 @@ This approach however is problematic because it introduces a bias towards unambi
 \begin{figure}
 	\centering
 	\includegraphics[width=0.7\textwidth]{gfx/osmac/cc.png}
-	\caption{Illustration of the bias introduced by CC.}\label{fig:osmac:cc}
+	\caption{Illustration of the bias introduced by CC.\ \sourceinline{Fithian2013}}\label{fig:osmac:cc}
 \end{figure}
 
 \subsubsection{Local Case Control}%
@@ -276,7 +278,7 @@ This tends to reduce the variance of the estimate \(\beta_{\mathcal{S}_{\mathrm{
 \label{sec:params:osmac:idea}
 
 While LCC tends to reduce the estimate's variance, it does not necessarily minimize it.
-The \textit{\textbf{O}ptimal \textbf{S}ubsampling \textbf{M}otivated by the \textbf{A}-Optimality \textbf{C}riterion} (OSMAC)~\cite{Wang2017} method improves upon LCC by minimizing the expected variance.\
+The \textit{\textbf{O}ptimal \textbf{S}ubsampling \textbf{M}otivated by the \textbf{A}-Optimality \textbf{C}riterion} (OSMAC)~\cite{Wang2017}\cite{Wang2018} method improves upon LCC by minimizing the expected variance.\
 Like LCC it also uses a pilot estimate \(\beta_0\) but the sampling probabilities \(\pi_i\) are then calculated differently.
 
 Let \(V := \mathrm{Cov}(\beta_{\mathcal{S}} - \beta_{\Dtrain})\) be the covariance matrix of the difference between the sample estimate and the complete dataset estimate.
@@ -382,7 +384,7 @@ OSMAC consistently gives the closest approximation of \(\beta\), confirming its 
 		\end{tikzpicture}
 		\caption{nzNormal}
 	\end{subfigure}
-	\caption{MSEs on \(\beta\) for different subsample sizes \(r\).}\label{fig:osmac:mse}
+	\caption{MSEs on \(\beta\) for different subsample sizes \(r\). \sourceinline[data source]{Wang2017}}\label{fig:osmac:mse}
 \end{figure}
 
 \subsection{Clustering for SVMs}%
@@ -417,7 +419,7 @@ Figure~\ref{fig:wkmsvm:compare:km} shows that this can cause KM-SVM to deviate s
 		\includegraphics[width=0.85\linewidth]{gfx/wkmsvm/wkm.png}
 		\caption{WKM-SVM}\label{fig:wkmsvm:compare:wkm}
 	\end{subfigure}
-	\caption{Comparison of the decision boundaries of KM-SVM and WKM-SVM.}\label{fig:wkmsvm:compare}
+	\caption{Comparison of the decision boundaries of KM-SVM and WKM-SVM.\\ \source{Bang2014}}\label{fig:wkmsvm:compare}
 \end{figure}
 
 WKM-SVM~\cite{Bang2014} improves upon KM-SVM by weighting each cluster center \(c_i\) by the amount of datapoints \(|C_i|\) it represents.
@@ -520,5 +522,5 @@ Figure~\ref{fig:wkmsvm:eval} shows that WKM-SVM consistently performs better tha
 			\end{axis}
 		\end{tikzpicture}
 	\end{subfigure}
-	\caption{Comparison of KM-SVM and WKM-SVM.}\label{fig:wkmsvm:eval}
+	\caption{Comparison of KM-SVM and WKM-SVM.\ \sourceinline[data source]{Bang2014}}\label{fig:wkmsvm:eval}
 \end{figure}
