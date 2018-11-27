@@ -1,0 +1,22 @@
+<svg width="500" height="500" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0)">
+<rect width="500" height="500" fill="white"/>
+<rect x="125.5" y="65.5" width="14" height="14" rx="7" fill="#318B1A" stroke="white"/>
+<line x1="0.679437" y1="-0.733734" x2="501.178" y2="462.728" stroke="#B3B3B3" stroke-opacity="0.6" stroke-width="2" stroke-dasharray="4 4"/>
+<rect x="270.5" y="205.5" width="14" height="14" rx="7" fill="#318B1A" stroke="white"/>
+<rect x="395.5" y="310.5" width="14" height="14" rx="7" fill="#318B1A" stroke="white"/>
+<rect x="310.5" y="65.5" width="14" height="14" rx="7" fill="#318B1A" stroke="white"/>
+<rect x="423.5" y="127.5" width="14" height="14" rx="7" fill="#318B1A" stroke="white"/>
+<rect x="270.5" y="324.5" width="14" height="14" transform="rotate(-90 270.5 324.5)" fill="#A42323" stroke="white"/>
+<rect x="190.5" y="246.5" width="14" height="14" transform="rotate(-90 190.5 246.5)" fill="#A42323" stroke="white"/>
+<rect x="100.5" y="169.5" width="14" height="14" transform="rotate(-90 100.5 169.5)" fill="#A42323" stroke="white"/>
+<rect x="150.5" y="414.5" width="14" height="14" transform="rotate(-90 150.5 414.5)" fill="#A42323" stroke="white"/>
+<rect x="335.5" y="419.5" width="14" height="14" transform="rotate(-90 335.5 419.5)" fill="#A42323" stroke="white"/>
+<line x1="10.7035" y1="-0.710724" x2="500.703" y2="484.289" stroke="#003E58" stroke-width="2" stroke-dasharray="4 4"/>
+</g>
+<defs>
+<clipPath id="clip0">
+<rect width="500" height="500" fill="white"/>
+</clipPath>
+</defs>
+</svg>
